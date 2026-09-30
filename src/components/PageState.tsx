@@ -1,6 +1,12 @@
+/**
+ * @fileoverview The three non-content page states. Pages check them in this
+ * order: Loading (isLoading), ErrorState (error), EmptyState (notFound or no
+ * items).
+ */
 import { useTranslation } from 'react-i18next';
 import { Spinner, Text } from '@sudobility/components';
 
+/** Centered spinner; also the Suspense fallback for lazy pages. */
 export function Loading({ label }: { label?: string }) {
   return (
     <div className="flex items-center justify-center min-h-[30vh]" role="status" aria-live="polite">
@@ -9,6 +15,7 @@ export function Loading({ label }: { label?: string }) {
   );
 }
 
+/** Nothing to show: an empty catalog or a record the API reports missing. */
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
     <div className="text-center py-16">

@@ -7,6 +7,7 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { useApi } from '@/context/apiContextDef';
 
+/** `/:lang/sites/:origin`; the router decodes the URL-encoded origin. */
 export default function SiteDetailPage() {
   const { t } = useTranslation();
   const { origin = '' } = useParams();
@@ -24,7 +25,12 @@ export default function SiteDetailPage() {
       <Heading level={1} size="3xl">
         {site.title ?? site.origin}
       </Heading>
-      <a href={site.origin} target="_blank" rel="noreferrer" className="font-mono text-sm text-primary underline">
+      <a
+        href={site.origin}
+        target="_blank"
+        rel="noreferrer"
+        className="font-mono text-sm text-primary underline"
+      >
         {site.origin}
       </a>
       {site.description ? (
@@ -34,7 +40,9 @@ export default function SiteDetailPage() {
       ) : null}
       {site.last_crawled_at ? (
         <Text size="sm" color="muted" className="mt-2">
-          {t('site.lastCrawled', 'Last crawled {{when}}', { when: new Date(site.last_crawled_at).toLocaleString() })}
+          {t('site.lastCrawled', 'Last crawled {{when}}', {
+            when: new Date(site.last_crawled_at).toLocaleString(),
+          })}
         </Text>
       ) : null}
       <Heading level={2} size="xl" className="mt-8 mb-3">
@@ -46,7 +54,11 @@ export default function SiteDetailPage() {
         <div className="grid gap-3 md:grid-cols-2 [&>*]:min-w-0">
           {apiHosts.map(host => (
             <LocalizedLink key={host} to={`/mcps/${encodeURIComponent(host)}`} className="block">
-              <Card variant="bordered" padding="md" className="hover:border-primary transition-colors">
+              <Card
+                variant="bordered"
+                padding="md"
+                className="hover:border-primary transition-colors"
+              >
                 <code className="font-mono">{host}</code>
               </Card>
             </LocalizedLink>

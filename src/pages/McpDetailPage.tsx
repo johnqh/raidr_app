@@ -10,18 +10,28 @@ import { ToolsTable } from '@/components/ToolsTable';
 import { ConnectDocs } from '@/components/ConnectDocs';
 import { useApi } from '@/context/apiContextDef';
 
+/**
+ * `/:lang/mcps/:apiHost`. The typed token is held here only to rebuild the
+ * connection snippets via useMcp; it is never sent to the API.
+ */
 export default function McpDetailPage() {
   const { t } = useTranslation();
   const { apiHost = '' } = useParams();
   const api = useApi();
   const [token, setToken] = useState('');
-  const { manifest, tools, skill, connect, isLoading, notFound, error } = useMcp({ ...api, apiHost, token });
+  const { manifest, tools, skill, connect, isLoading, notFound, error } = useMcp({
+    ...api,
+    apiHost,
+    token,
+  });
   const sites = useSiteCatalog({ ...api, apiHost });
 
   if (isLoading) return <Loading />;
   if (error) return <ErrorState error={error} />;
   if (notFound || !manifest) {
-    return <EmptyState title={t('mcp.notFound', 'No MCP published for {{host}}', { host: apiHost })} />;
+    return (
+      <EmptyState title={t('mcp.notFound', 'No MCP published for {{host}}', { host: apiHost })} />
+    );
   }
 
   return (
@@ -88,7 +98,10 @@ export default function McpDetailPage() {
           <ul className="space-y-1">
             {sites.items.map(site => (
               <li key={site.origin}>
-                <LocalizedLink to={`/sites/${encodeURIComponent(site.origin)}`} className="text-primary underline">
+                <LocalizedLink
+                  to={`/sites/${encodeURIComponent(site.origin)}`}
+                  className="text-primary underline"
+                >
                   {site.title ?? site.origin}
                 </LocalizedLink>
               </li>

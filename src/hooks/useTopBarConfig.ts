@@ -6,6 +6,10 @@ import { LinkWrapper } from '@/components/layout/LinkWrapper';
 import { useLocalizedNavigate } from '@/hooks/useLocalizedNavigate';
 import { isLanguageSupported, SUPPORTED_LANGUAGES } from '@/i18n';
 
+/**
+ * Sticky `base` top bar with the three catalog links. The language selector
+ * hides itself while only one language is supported.
+ */
 export function useTopBarConfig(): TopBarConfig {
   const { t } = useTranslation();
   const { navigate, switchLanguage, currentLanguage } = useLocalizedNavigate();

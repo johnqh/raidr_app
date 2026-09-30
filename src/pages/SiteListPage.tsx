@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@/context/apiContextDef';
 
+/** `/:lang/sites`: searchable list of crawled sites. */
 export default function SiteListPage() {
   const { t } = useTranslation();
   const api = useApi();
@@ -20,7 +21,11 @@ export default function SiteListPage() {
       <Text color="muted" className="mb-6">
         {t('sites.subtitle', 'Crawled websites and the API hosts they were seen calling.')}
       </Text>
-      <SearchBar search={catalog.search} onSearch={catalog.setSearch} placeholder={t('sites.search', 'Search by origin')} />
+      <SearchBar
+        search={catalog.search}
+        onSearch={catalog.setSearch}
+        placeholder={t('sites.search', 'Search by origin')}
+      />
       {catalog.isLoading ? (
         <Loading />
       ) : catalog.error ? (
@@ -30,8 +35,16 @@ export default function SiteListPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6 [&>*]:min-w-0">
           {catalog.items.map(site => (
-            <LocalizedLink key={site.origin} to={`/sites/${encodeURIComponent(site.origin)}`} className="block">
-              <Card variant="bordered" padding="md" className="h-full hover:border-primary transition-colors">
+            <LocalizedLink
+              key={site.origin}
+              to={`/sites/${encodeURIComponent(site.origin)}`}
+              className="block"
+            >
+              <Card
+                variant="bordered"
+                padding="md"
+                className="h-full hover:border-primary transition-colors"
+              >
                 <Text weight="semibold" truncate>
                   {site.title ?? site.origin}
                 </Text>

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview i18next setup. Strings load over HTTP from
+ * `public/locales/<lng>/app.json` (single `app` namespace). Every `t()` call
+ * also carries an English default, the fallback when a key is missing.
+ */
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
@@ -7,6 +12,7 @@ import { SUPPORTED_LANGUAGES, isLanguageSupported } from './config/languages';
 export { SUPPORTED_LANGUAGES, LANGUAGE_NAMES, isLanguageSupported } from './config/languages';
 export type { SupportedLanguage } from './config/languages';
 
+/** Initial language: URL segment, then stored choice, then `en`. */
 const detectLanguageFromPath = (): string => {
   if (typeof window === 'undefined') return 'en';
   const pathLang = window.location.pathname.split('/')[1];
@@ -22,6 +28,7 @@ const detectLanguageFromPath = (): string => {
 
 let initialized = false;
 
+/** Idempotent; called by di_web's initializeWebApp during boot. */
 export function initializeI18n(): void {
   if (initialized) return;
   initialized = true;

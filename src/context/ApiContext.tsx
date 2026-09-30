@@ -7,6 +7,10 @@ import { webNetworkClient } from '@sudobility/di/web';
 import { CONSTANTS } from '@/config/constants';
 import { ApiContext, type ApiContextValue } from './apiContextDef';
 
+/**
+ * Provides the DI web NetworkClient and CONSTANTS.API_URL. The value is
+ * memoized once so raidr_client's memoized client is never rebuilt.
+ */
 export function ApiProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ApiContextValue>(
     () => ({ networkClient: webNetworkClient, baseUrl: CONSTANTS.API_URL }),

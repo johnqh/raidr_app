@@ -3,6 +3,7 @@ import { Button, Heading, Text } from '@sudobility/components';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 
+/** `/:lang/404`; unknown paths under a language redirect here. */
 export default function NotFoundPage() {
   const { t } = useTranslation();
   return (
@@ -15,7 +16,10 @@ export default function NotFoundPage() {
           {t('errors.notFound.title', 'Page Not Found')}
         </Heading>
         <Text size="lg" color="muted" className="max-w-md mx-auto mb-8">
-          {t('errors.notFound.description', 'The page you are looking for does not exist or has been moved.')}
+          {t(
+            'errors.notFound.description',
+            'The page you are looking for does not exist or has been moved.'
+          )}
         </Text>
         <LocalizedLink to="/">
           <Button size="lg">{t('errors.notFound.goHome', 'Go to Home')}</Button>

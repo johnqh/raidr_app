@@ -3,6 +3,11 @@ import { Badge, Text } from '@sudobility/components';
 import type { McpTool } from '@sudobility/raidr_types';
 import { formatToolRequest, isMutatingTool, toolInputFields } from '@sudobility/raidr_lib';
 
+/**
+ * Manifest tools as a table: name (with a badge when mutating), request line,
+ * inputs with their location, description. Formatting comes from raidr_lib;
+ * the wrapper scrolls horizontally on narrow screens.
+ */
 export function ToolsTable({ tools }: { tools: McpTool[] }) {
   const { t } = useTranslation();
   if (tools.length === 0) {

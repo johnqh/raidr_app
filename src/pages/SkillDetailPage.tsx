@@ -9,6 +9,7 @@ import { CopyBlock } from '@/components/CopyBlock';
 import { Markdown } from '@/components/Markdown';
 import { useApi } from '@/context/apiContextDef';
 
+/** `/:lang/skills/:apiHost`: SKILL.md rendered, with download and install commands. */
 export default function SkillDetailPage() {
   const { t } = useTranslation();
   const { apiHost = '' } = useParams();
@@ -18,7 +19,11 @@ export default function SkillDetailPage() {
   if (isLoading) return <Loading />;
   if (error) return <ErrorState error={error} />;
   if (notFound || !skill || !install) {
-    return <EmptyState title={t('skill.notFound', 'No skill published for {{host}}', { host: apiHost })} />;
+    return (
+      <EmptyState
+        title={t('skill.notFound', 'No skill published for {{host}}', { host: apiHost })}
+      />
+    );
   }
 
   return (
@@ -54,10 +59,16 @@ export default function SkillDetailPage() {
           {t('skill.installTitle', 'Install')}
         </Heading>
         <Text color="muted" className="mb-2">
-          {t('skill.installClaude', 'Claude Code reads personal skills from ~/.claude/skills. Start a new session after installing.')}
+          {t(
+            'skill.installClaude',
+            'Claude Code reads personal skills from ~/.claude/skills. Start a new session after installing.'
+          )}
         </Text>
         <CopyBlock code={install.claudeCurl} title="Claude Code" />
-        <CopyBlock code={install.agentsCurl} title={t('skill.installAgents', 'Codex, Gemini CLI, Copilot CLI')} />
+        <CopyBlock
+          code={install.agentsCurl}
+          title={t('skill.installAgents', 'Codex, Gemini CLI, Copilot CLI')}
+        />
       </Section>
 
       <Section spacing="md">

@@ -1,5 +1,6 @@
 import { LocalizedLink } from './LocalizedLink';
 
+/** `{ href }` link adapter that building_blocks' top bar and footer expect. */
 export const LinkWrapper = ({
   href,
   children,

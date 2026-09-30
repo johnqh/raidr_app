@@ -5,8 +5,11 @@ import type { ConnectConfigs } from '@sudobility/raidr_lib';
 import { CopyBlock } from './CopyBlock';
 
 interface ConnectDocsProps {
+  /** Snippets from raidr_lib's useMcp, already built with the current token. */
   connect: ConnectConfigs;
+  /** Manifest auth style; `'none'` hides the token input. */
   authStyle: string;
+  /** Lifts the token to the page, which feeds it back to useMcp. */
   onTokenChange: (token: string) => void;
 }
 
@@ -38,7 +41,10 @@ export function ConnectDocs({ connect, authStyle, onTokenChange }: ConnectDocsPr
               setToken(e.target.value);
               onTokenChange(e.target.value);
             }}
-            placeholder={t('connect.tokenPlaceholder', 'Paste the token from the skill instructions')}
+            placeholder={t(
+              'connect.tokenPlaceholder',
+              'Paste the token from the skill instructions'
+            )}
           />
         </div>
       ) : (
@@ -57,7 +63,11 @@ export function ConnectDocs({ connect, authStyle, onTokenChange }: ConnectDocsPr
           <CopyBlock code={connect.claudeCode.json} language="json" title=".mcp.json" />
         </TabsContent>
         <TabsContent value="claude-desktop">
-          <CopyBlock code={connect.claudeDesktop.json} language="json" title="claude_desktop_config.json" />
+          <CopyBlock
+            code={connect.claudeDesktop.json}
+            language="json"
+            title="claude_desktop_config.json"
+          />
         </TabsContent>
         <TabsContent value="cursor">
           <CopyBlock code={connect.cursor.json} language="json" title=".cursor/mcp.json" />

@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@/context/apiContextDef';
 
+/** `/:lang/skills`: searchable skill catalog. */
 export default function SkillListPage() {
   const { t } = useTranslation();
   const api = useApi();
@@ -18,9 +19,16 @@ export default function SkillListPage() {
         {t('skills.title', 'Skills')}
       </Heading>
       <Text color="muted" className="mb-6">
-        {t('skills.subtitle', 'One SKILL.md per API host: what it does, how to log in and grab a token, and how to connect the MCP server.')}
+        {t(
+          'skills.subtitle',
+          'One SKILL.md per API host: what it does, how to log in and grab a token, and how to connect the MCP server.'
+        )}
       </Text>
-      <SearchBar search={catalog.search} onSearch={catalog.setSearch} placeholder={t('skills.search', 'Search skills')} />
+      <SearchBar
+        search={catalog.search}
+        onSearch={catalog.setSearch}
+        placeholder={t('skills.search', 'Search skills')}
+      />
       {catalog.isLoading ? (
         <Loading />
       ) : catalog.error ? (
@@ -30,8 +38,16 @@ export default function SkillListPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6 [&>*]:min-w-0">
           {catalog.items.map(skill => (
-            <LocalizedLink key={skill.api_host} to={`/skills/${encodeURIComponent(skill.api_host)}`} className="block">
-              <Card variant="bordered" padding="md" className="h-full hover:border-primary transition-colors">
+            <LocalizedLink
+              key={skill.api_host}
+              to={`/skills/${encodeURIComponent(skill.api_host)}`}
+              className="block"
+            >
+              <Card
+                variant="bordered"
+                padding="md"
+                className="h-full hover:border-primary transition-colors"
+              >
                 <Text weight="semibold" truncate>
                   {skill.name}
                 </Text>

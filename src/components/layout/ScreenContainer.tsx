@@ -6,6 +6,7 @@ import { AppPageLayout } from '@sudobility/building_blocks';
 import { useTopBarConfig } from '@/hooks/useTopBarConfig';
 import { useFooterConfig } from '@/hooks/useFooterConfig';
 
+/** Full-width layout; each page constrains its own width with Section. */
 export default function ScreenContainer({ children }: { children: ReactNode }) {
   const topBar = useTopBarConfig();
   const footer = useFooterConfig();

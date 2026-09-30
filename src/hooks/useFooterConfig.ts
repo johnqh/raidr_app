@@ -3,6 +3,7 @@ import type { FooterConfig } from '@sudobility/building_blocks';
 import { LinkWrapper } from '@/components/layout/LinkWrapper';
 import { CONSTANTS } from '@/config/constants';
 
+/** Compact footer: version from package.json, copyright, and the three catalog links. */
 export function useFooterConfig(): FooterConfig {
   const { t } = useTranslation();
   return {

@@ -8,6 +8,15 @@ import { configureTheme } from '@sudobility/design';
 import { defaultTheme, generateThemeCSS } from '@sudobility/design/themes';
 import { initializeI18n } from '../i18n';
 
+/**
+ * Boot sequence, awaited by main.tsx before App is imported:
+ * 1. theme: configureTheme + generateThemeCSS injected as
+ *    `<style id="sudobility-design-theme">`, because the Tailwind preset maps
+ *    semantic classes to CSS variables that only this style defines;
+ * 2. initializeWebApp: storage, Firebase app + Analytics, network, info,
+ *    then `initializeI18n`, then the shared service worker.
+ * No `revenueCatConfig` is passed, so subscriptions are never initialized.
+ */
 export async function initializeApp(): Promise<void> {
   configureTheme(defaultTheme);
   if (typeof document !== 'undefined') {

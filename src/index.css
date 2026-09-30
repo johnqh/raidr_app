@@ -19,17 +19,46 @@ body {
 }
 
 /* Rendered SKILL.md */
-.skill-markdown h1 { @apply text-2xl font-semibold mt-6 mb-3; }
-.skill-markdown h2 { @apply text-xl font-semibold mt-6 mb-2; }
-.skill-markdown h3 { @apply text-lg font-medium mt-4 mb-2; }
-.skill-markdown p { @apply my-2 leading-relaxed; }
-.skill-markdown ul { @apply list-disc pl-6 my-2; }
-.skill-markdown ol { @apply list-decimal pl-6 my-2; }
-.skill-markdown li { @apply my-1; }
-.skill-markdown code { @apply font-mono text-sm bg-muted rounded px-1 py-0.5; }
-.skill-markdown pre { @apply font-mono text-sm bg-muted rounded-lg p-4 my-3 overflow-x-auto; }
-.skill-markdown pre code { @apply bg-transparent p-0; }
-.skill-markdown table { @apply w-full text-sm my-3 border-collapse; }
-.skill-markdown th, .skill-markdown td { @apply border border-border px-2 py-1 text-left align-top; }
-.skill-markdown a { @apply text-primary underline; }
-.skill-markdown blockquote { @apply border-l-4 border-border pl-4 my-3 text-muted-foreground; }
+.skill-markdown h1 {
+  @apply text-2xl font-semibold mt-6 mb-3;
+}
+.skill-markdown h2 {
+  @apply text-xl font-semibold mt-6 mb-2;
+}
+.skill-markdown h3 {
+  @apply text-lg font-medium mt-4 mb-2;
+}
+.skill-markdown p {
+  @apply my-2 leading-relaxed;
+}
+.skill-markdown ul {
+  @apply list-disc pl-6 my-2;
+}
+.skill-markdown ol {
+  @apply list-decimal pl-6 my-2;
+}
+.skill-markdown li {
+  @apply my-1;
+}
+.skill-markdown code {
+  @apply font-mono text-sm bg-muted rounded px-1 py-0.5;
+}
+.skill-markdown pre {
+  @apply font-mono text-sm bg-muted rounded-lg p-4 my-3 overflow-x-auto;
+}
+.skill-markdown pre code {
+  @apply bg-transparent p-0;
+}
+.skill-markdown table {
+  @apply w-full text-sm my-3 border-collapse;
+}
+.skill-markdown th,
+.skill-markdown td {
+  @apply border border-border px-2 py-1 text-left align-top;
+}
+.skill-markdown a {
+  @apply text-primary underline;
+}
+.skill-markdown blockquote {
+  @apply border-l-4 border-border pl-4 my-3 text-muted-foreground;
+}

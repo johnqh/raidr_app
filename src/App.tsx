@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Root component and route table.
+ *
+ * SudobilityApp supplies the providers (i18n, theme, network status, TanStack
+ * Query, toasts, router) and its default PageTracker, which sends a Firebase
+ * Analytics page_view per navigation. Every page is lazy-loaded and lives
+ * under `/:lang`.
+ */
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
 import { SudobilityApp } from '@sudobility/building_blocks';
@@ -18,20 +26,27 @@ const SiteListPage = lazy(() => import('./pages/SiteListPage'));
 const SiteDetailPage = lazy(() => import('./pages/SiteDetailPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
+/** App-specific providers SudobilityApp mounts inside its own (outside the router). */
 function AppProviders({ children }: { children: ReactNode }) {
   return <ApiProvider>{children}</ApiProvider>;
 }
 
+/** Keeps `<html lang/dir>` in step with the active language. */
 function DocumentLanguageSync({ children }: { children: ReactNode }) {
   useDocumentLanguage();
   return <>{children}</>;
 }
 
+/** Unknown path under a valid language: redirect to that language's 404 page. */
 function NotFoundRedirect() {
   const { lang } = useParams();
   return <Navigate to={`/${lang ?? 'en'}/404`} replace />;
 }
 
+/**
+ * Top bar + footer around every page. The inner ErrorBoundary and Suspense
+ * keep the shell visible while a page chunk loads or fails.
+ */
 function ScreenContainerLayout() {
   return (
     <ScreenContainer>
@@ -44,17 +59,29 @@ function ScreenContainerLayout() {
   );
 }
 
+/**
+ * `/` and paths with an unsupported first segment go to LanguageRedirect;
+ * LanguageValidator checks `:lang` and remembers it under the `language`
+ * storage key (the same key i18n.ts reads).
+ */
 function AppRoutes() {
   return (
     <DocumentLanguageSync>
       <ErrorBoundary>
         <Suspense fallback={<Loading />}>
           <Routes>
-            <Route path="/" element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />} />
+            <Route
+              path="/"
+              element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />}
+            />
             <Route
               path="/:lang"
               element={
-                <LanguageValidator isLanguageSupported={isLanguageSupported} defaultLanguage="en" storageKey="language" />
+                <LanguageValidator
+                  isLanguageSupported={isLanguageSupported}
+                  defaultLanguage="en"
+                  storageKey="language"
+                />
               }
             >
               <Route element={<ScreenContainerLayout />}>
@@ -69,7 +96,10 @@ function AppRoutes() {
                 <Route path="*" element={<NotFoundRedirect />} />
               </Route>
             </Route>
-            <Route path="*" element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />} />
+            <Route
+              path="*"
+              element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />}
+            />
           </Routes>
         </Suspense>
       </ErrorBoundary>
@@ -77,6 +107,7 @@ function AppRoutes() {
   );
 }
 
+/** Root component, rendered by main.tsx once initializeApp() has resolved. */
 export default function App() {
   return (
     <SudobilityApp

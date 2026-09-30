@@ -3,6 +3,7 @@
  */
 import packageJson from '../../package.json';
 
+/** Read once at import; unset VITE_* values fall back to production defaults. */
 export const CONSTANTS = {
   APP_NAME: import.meta.env.VITE_APP_NAME || 'raidr',
   APP_DOMAIN: import.meta.env.VITE_APP_DOMAIN || 'raidr.app',

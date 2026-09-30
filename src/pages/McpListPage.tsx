@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@/context/apiContextDef';
 
+/** `/:lang/mcps`: searchable MCP catalog. */
 export default function McpListPage() {
   const { t } = useTranslation();
   const api = useApi();
@@ -20,18 +21,33 @@ export default function McpListPage() {
       <Text color="muted" className="mb-6">
         {t('mcps.subtitle', 'One hosted MCP server per API host, generated from observed traffic.')}
       </Text>
-      <SearchBar search={catalog.search} onSearch={catalog.setSearch} placeholder={t('mcps.search', 'Search by host or title')} />
+      <SearchBar
+        search={catalog.search}
+        onSearch={catalog.setSearch}
+        placeholder={t('mcps.search', 'Search by host or title')}
+      />
       {catalog.isLoading ? (
         <Loading />
       ) : catalog.error ? (
         <ErrorState error={catalog.error} />
       ) : catalog.items.length === 0 ? (
-        <EmptyState title={t('mcps.empty', 'No MCP servers yet')} description={t('mcps.emptyHint', 'Publish one with raidr-crawler.')} />
+        <EmptyState
+          title={t('mcps.empty', 'No MCP servers yet')}
+          description={t('mcps.emptyHint', 'Publish one with raidr-crawler.')}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6 [&>*]:min-w-0">
           {catalog.items.map(mcp => (
-            <LocalizedLink key={mcp.api_host} to={`/mcps/${encodeURIComponent(mcp.api_host)}`} className="block">
-              <Card variant="bordered" padding="md" className="h-full hover:border-primary transition-colors">
+            <LocalizedLink
+              key={mcp.api_host}
+              to={`/mcps/${encodeURIComponent(mcp.api_host)}`}
+              className="block"
+            >
+              <Card
+                variant="bordered"
+                padding="md"
+                className="h-full hover:border-primary transition-colors"
+              >
                 <div className="flex items-start justify-between gap-2">
                   <Text weight="semibold" truncate>
                     {mcp.title ?? mcp.api_host}
