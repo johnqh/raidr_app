@@ -1,7 +1,15 @@
 {
-  "app": { "name": "raidr" },
-  "nav": { "mcps": "MCP servers", "skills": "Skills", "sites": "Sites" },
-  "footer": { "rightsText": "All rights reserved" },
+  "app": {
+    "name": "raidr"
+  },
+  "nav": {
+    "mcps": "MCP servers",
+    "skills": "Skills",
+    "sites": "Sites"
+  },
+  "footer": {
+    "rightsText": "All rights reserved"
+  },
   "pagination": {
     "summary": "{{count}} results · page {{page}} of {{pageCount}}",
     "previous": "Previous",
@@ -83,6 +91,10 @@
       "title": "Page Not Found",
       "description": "The page you are looking for does not exist or has been moved.",
       "goHome": "Go to Home"
+    },
+    "api": {
+      "title": "Could not load this from the raidr API",
+      "description": "The API may be unreachable. Try again in a moment."
     }
   },
   "errorBoundary": {

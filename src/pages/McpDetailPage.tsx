@@ -5,7 +5,7 @@ import { Alert, Badge, Button, Heading, Text } from '@sudobility/components';
 import { useMcp, useSiteCatalog } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
-import { EmptyState, Loading } from '@/components/PageState';
+import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { ToolsTable } from '@/components/ToolsTable';
 import { ConnectDocs } from '@/components/ConnectDocs';
 import { useApi } from '@/context/apiContextDef';
@@ -15,10 +15,11 @@ export default function McpDetailPage() {
   const { apiHost = '' } = useParams();
   const api = useApi();
   const [token, setToken] = useState('');
-  const { manifest, tools, skill, connect, isLoading, notFound } = useMcp({ ...api, apiHost, token });
+  const { manifest, tools, skill, connect, isLoading, notFound, error } = useMcp({ ...api, apiHost, token });
   const sites = useSiteCatalog({ ...api, apiHost });
 
   if (isLoading) return <Loading />;
+  if (error) return <ErrorState error={error} />;
   if (notFound || !manifest) {
     return <EmptyState title={t('mcp.notFound', 'No MCP published for {{host}}', { host: apiHost })} />;
   }

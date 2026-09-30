@@ -1,6 +1,5 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
 import { SudobilityApp } from '@sudobility/building_blocks';
 import { LanguageRedirect, LanguageValidator } from '@sudobility/components';
 import i18n, { isLanguageSupported } from './i18n';
@@ -20,11 +19,7 @@ const SiteDetailPage = lazy(() => import('./pages/SiteDetailPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function AppProviders({ children }: { children: ReactNode }) {
-  return (
-    <HelmetProvider>
-      <ApiProvider>{children}</ApiProvider>
-    </HelmetProvider>
-  );
+  return <ApiProvider>{children}</ApiProvider>;
 }
 
 function DocumentLanguageSync({ children }: { children: ReactNode }) {
@@ -84,7 +79,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <SudobilityApp i18n={i18n} AppProviders={AppProviders} PageTracker={false} storageKeyPrefix="raidr">
+    <SudobilityApp
+      i18n={i18n}
+      AppProviders={AppProviders}
+      LoadingFallback={Loading}
+      storageKeyPrefix="raidr"
+    >
       <AppRoutes />
     </SudobilityApp>
   );

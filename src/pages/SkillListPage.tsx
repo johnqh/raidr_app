@@ -3,7 +3,7 @@ import { Card, Heading, Text } from '@sudobility/components';
 import { useSkillCatalog } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
-import { EmptyState, Loading } from '@/components/PageState';
+import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@/context/apiContextDef';
 
@@ -23,6 +23,8 @@ export default function SkillListPage() {
       <SearchBar search={catalog.search} onSearch={catalog.setSearch} placeholder={t('skills.search', 'Search skills')} />
       {catalog.isLoading ? (
         <Loading />
+      ) : catalog.error ? (
+        <ErrorState error={catalog.error} />
       ) : catalog.items.length === 0 ? (
         <EmptyState title={t('skills.empty', 'No skills yet')} />
       ) : (

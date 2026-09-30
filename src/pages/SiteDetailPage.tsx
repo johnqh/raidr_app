@@ -4,16 +4,17 @@ import { Card, Heading, Text } from '@sudobility/components';
 import { useSite } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
-import { EmptyState, Loading } from '@/components/PageState';
+import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { useApi } from '@/context/apiContextDef';
 
 export default function SiteDetailPage() {
   const { t } = useTranslation();
   const { origin = '' } = useParams();
   const api = useApi();
-  const { site, apiHosts, isLoading, notFound } = useSite({ ...api, origin });
+  const { site, apiHosts, isLoading, notFound, error } = useSite({ ...api, origin });
 
   if (isLoading) return <Loading />;
+  if (error) return <ErrorState error={error} />;
   if (notFound || !site) {
     return <EmptyState title={t('site.notFound', 'No record for {{origin}}', { origin })} />;
   }

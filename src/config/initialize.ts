@@ -1,7 +1,9 @@
 /**
- * @fileoverview App initialization: theme CSS and i18n. No Firebase, no
- * analytics, no service worker; this app only reads a public catalog.
+ * @fileoverview App initialization: theme CSS, then DI services via
+ * di_web's initializeWebApp (storage, Firebase Analytics, network, info,
+ * i18n, service worker). Firebase Auth is not used: the catalog is public.
  */
+import { initializeWebApp } from '@sudobility/di_web';
 import { configureTheme } from '@sudobility/design';
 import { defaultTheme, generateThemeCSS } from '@sudobility/design/themes';
 import { initializeI18n } from '../i18n';
@@ -14,5 +16,18 @@ export async function initializeApp(): Promise<void> {
     styleEl.textContent = generateThemeCSS(defaultTheme);
     document.head.appendChild(styleEl);
   }
-  initializeI18n();
+
+  await initializeWebApp({
+    firebaseConfig: {
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID,
+      measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    },
+    initializeI18n,
+    registerServiceWorker: true,
+  });
 }

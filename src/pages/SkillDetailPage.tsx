@@ -4,7 +4,7 @@ import { Button, Heading, Text } from '@sudobility/components';
 import { useSkill } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
-import { EmptyState, Loading } from '@/components/PageState';
+import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { CopyBlock } from '@/components/CopyBlock';
 import { Markdown } from '@/components/Markdown';
 import { useApi } from '@/context/apiContextDef';
@@ -13,9 +13,10 @@ export default function SkillDetailPage() {
   const { t } = useTranslation();
   const { apiHost = '' } = useParams();
   const api = useApi();
-  const { skill, install, hasMcp, isLoading, notFound } = useSkill({ ...api, apiHost });
+  const { skill, install, hasMcp, isLoading, notFound, error } = useSkill({ ...api, apiHost });
 
   if (isLoading) return <Loading />;
+  if (error) return <ErrorState error={error} />;
   if (notFound || !skill || !install) {
     return <EmptyState title={t('skill.notFound', 'No skill published for {{host}}', { host: apiHost })} />;
   }

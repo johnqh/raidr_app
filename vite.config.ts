@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import { serviceWorkerPlugin } from '@sudobility/di_web/vite';
 import path from 'path';
 import packageJson from './package.json';
 
@@ -27,6 +28,7 @@ export default defineConfig({
       '@sudobility/entity_client',
       'firebase',
       'firebase/app',
+      'firebase/analytics',
       '@sudobility/raidr_client',
       '@sudobility/raidr_lib',
     ],
@@ -34,7 +36,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  plugins: [react()],
+  plugins: [react(), serviceWorkerPlugin()],
   build: {
     target: 'esnext',
     chunkSizeWarningLimit: 700,
@@ -55,7 +57,10 @@ export default defineConfig({
             return 'markdown';
           }
           if (id.includes('node_modules/@heroicons/')) return 'icons';
-          if (id.includes('node_modules/firebase/') || id.includes('node_modules/@firebase/')) return 'firebase';
+          // Firebase Analytics: its own chunk, like sudojo_app
+          if (id.includes('node_modules/firebase/') || id.includes('node_modules/@firebase/')) {
+            return 'firebase';
+          }
           if (id.includes('node_modules/@sudobility/raidr_')) return 'raidr';
           if (
             id.includes('node_modules/@sudobility/') ||

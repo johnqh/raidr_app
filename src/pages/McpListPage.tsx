@@ -3,7 +3,7 @@ import { Badge, Card, Heading, Text } from '@sudobility/components';
 import { useMcpCatalog } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
-import { EmptyState, Loading } from '@/components/PageState';
+import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@/context/apiContextDef';
 
@@ -23,6 +23,8 @@ export default function McpListPage() {
       <SearchBar search={catalog.search} onSearch={catalog.setSearch} placeholder={t('mcps.search', 'Search by host or title')} />
       {catalog.isLoading ? (
         <Loading />
+      ) : catalog.error ? (
+        <ErrorState error={catalog.error} />
       ) : catalog.items.length === 0 ? (
         <EmptyState title={t('mcps.empty', 'No MCP servers yet')} description={t('mcps.emptyHint', 'Publish one with raidr-crawler.')} />
       ) : (
