@@ -1,0 +1,91 @@
+import { lazy, Suspense, type ReactNode } from 'react';
+import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { SudobilityApp } from '@sudobility/building_blocks';
+import { LanguageRedirect, LanguageValidator } from '@sudobility/components';
+import i18n, { isLanguageSupported } from './i18n';
+import { ApiProvider } from './context/ApiContext';
+import ScreenContainer from './components/layout/ScreenContainer';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
+import { Loading } from './components/PageState';
+import { useDocumentLanguage } from './hooks/useDocumentLanguage';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const McpListPage = lazy(() => import('./pages/McpListPage'));
+const McpDetailPage = lazy(() => import('./pages/McpDetailPage'));
+const SkillListPage = lazy(() => import('./pages/SkillListPage'));
+const SkillDetailPage = lazy(() => import('./pages/SkillDetailPage'));
+const SiteListPage = lazy(() => import('./pages/SiteListPage'));
+const SiteDetailPage = lazy(() => import('./pages/SiteDetailPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+function AppProviders({ children }: { children: ReactNode }) {
+  return (
+    <HelmetProvider>
+      <ApiProvider>{children}</ApiProvider>
+    </HelmetProvider>
+  );
+}
+
+function DocumentLanguageSync({ children }: { children: ReactNode }) {
+  useDocumentLanguage();
+  return <>{children}</>;
+}
+
+function NotFoundRedirect() {
+  const { lang } = useParams();
+  return <Navigate to={`/${lang ?? 'en'}/404`} replace />;
+}
+
+function ScreenContainerLayout() {
+  return (
+    <ScreenContainer>
+      <ErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
+      </ErrorBoundary>
+    </ScreenContainer>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <DocumentLanguageSync>
+      <ErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />} />
+            <Route
+              path="/:lang"
+              element={
+                <LanguageValidator isLanguageSupported={isLanguageSupported} defaultLanguage="en" storageKey="language" />
+              }
+            >
+              <Route element={<ScreenContainerLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path="mcps" element={<McpListPage />} />
+                <Route path="mcps/:apiHost" element={<McpDetailPage />} />
+                <Route path="skills" element={<SkillListPage />} />
+                <Route path="skills/:apiHost" element={<SkillDetailPage />} />
+                <Route path="sites" element={<SiteListPage />} />
+                <Route path="sites/:origin" element={<SiteDetailPage />} />
+                <Route path="404" element={<NotFoundPage />} />
+                <Route path="*" element={<NotFoundRedirect />} />
+              </Route>
+            </Route>
+            <Route path="*" element={<LanguageRedirect isLanguageSupported={isLanguageSupported} />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
+    </DocumentLanguageSync>
+  );
+}
+
+export default function App() {
+  return (
+    <SudobilityApp i18n={i18n} AppProviders={AppProviders} PageTracker={false} storageKeyPrefix="raidr">
+      <AppRoutes />
+    </SudobilityApp>
+  );
+}

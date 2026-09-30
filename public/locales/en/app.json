@@ -1,0 +1,94 @@
+{
+  "app": { "name": "raidr" },
+  "nav": { "mcps": "MCP servers", "skills": "Skills", "sites": "Sites" },
+  "footer": { "rightsText": "All rights reserved" },
+  "pagination": {
+    "summary": "{{count}} results · page {{page}} of {{pageCount}}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "home": {
+    "title": "MCP servers for any website",
+    "subtitle": "raidr crawls a site, reads the JavaScript it ships, and turns the APIs it calls into a hosted MCP server plus an agent skill that explains how to get a token. Bring your own login; the tools do the rest.",
+    "browseMcps": "Browse MCP servers",
+    "browseSkills": "Browse skills",
+    "howTitle": "How a connection works",
+    "how1": "Pick an API host. Its page lists every tool and the request each one makes.",
+    "how2": "Open the matching skill to see exactly where to copy your token from after logging in to the site.",
+    "how3": "Add the endpoint to your MCP client with the token in the X-Raidr-Token header.",
+    "example": "Example"
+  },
+  "mcps": {
+    "title": "MCP servers",
+    "subtitle": "One hosted MCP server per API host, generated from observed traffic.",
+    "search": "Search by host or title",
+    "empty": "No MCP servers yet",
+    "emptyHint": "Publish one with raidr-crawler.",
+    "toolCount": "{{count}} tools"
+  },
+  "mcp": {
+    "notFound": "No MCP published for {{host}}",
+    "auth": "auth: {{style}}",
+    "skillTitle": "A skill explains how to get a token for this API",
+    "openSkill": "Open the skill",
+    "connectTitle": "Connect",
+    "toolsTitle": "Tools",
+    "sitesTitle": "Sites using this API",
+    "noSites": "None recorded yet.",
+    "noTools": "This manifest has no tools.",
+    "tool": "Tool",
+    "request": "Request",
+    "inputs": "Inputs",
+    "description": "Description",
+    "mutates": "mutates",
+    "source": "Generated {{when}} from {{bundle}} by raidr-crawler {{version}}."
+  },
+  "connect": {
+    "intro": "Add the hosted endpoint to your MCP client. Your site token travels in the {{header}} header and is forwarded to the upstream API on every call; raidr never stores it.",
+    "endpoint": "MCP endpoint",
+    "tokenLabel": "Your token (optional, fills the snippets below)",
+    "tokenPlaceholder": "Paste the token from the skill instructions",
+    "noAuth": "This API needs no token.",
+    "cli": "One command"
+  },
+  "skills": {
+    "title": "Skills",
+    "subtitle": "One SKILL.md per API host: what it does, how to log in and grab a token, and how to connect the MCP server.",
+    "search": "Search skills",
+    "empty": "No skills yet"
+  },
+  "skill": {
+    "notFound": "No skill published for {{host}}",
+    "download": "Download SKILL.md",
+    "openMcp": "Open the MCP server",
+    "installTitle": "Install",
+    "installClaude": "Claude Code reads personal skills from ~/.claude/skills. Start a new session after installing.",
+    "installAgents": "Codex, Gemini CLI, Copilot CLI",
+    "contentTitle": "SKILL.md"
+  },
+  "sites": {
+    "title": "Sites",
+    "subtitle": "Crawled websites and the API hosts they were seen calling.",
+    "search": "Search by origin",
+    "empty": "No sites yet"
+  },
+  "site": {
+    "notFound": "No record for {{origin}}",
+    "lastCrawled": "Last crawled {{when}}",
+    "apiHosts": "API hosts",
+    "noHosts": "No API hosts recorded."
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for does not exist or has been moved.",
+      "goHome": "Go to Home"
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "chunkError": "A new version of the app may be available. Please try again.",
+    "genericError": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try again"
+  }
+}

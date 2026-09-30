@@ -1,0 +1,5 @@
+# Canonical language entry point (no trailing slash)
+/ /en 308
+
+# SPA fallback
+/* /index.html 200
