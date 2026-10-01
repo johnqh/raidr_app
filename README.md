@@ -26,7 +26,7 @@ a key to connect any MCP client to `https://api.raidr.app/mcp/<apiHost>`.
 ```bash
 cp .env.example .env      # VITE_API_URL, and VITE_FIREBASE_* (required)
 bun install
-bun run dev               # http://localhost:5194
+bun run dev               # http://localhost:5144
 ```
 
 ## Verify and deploy

@@ -24,15 +24,17 @@ BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 #
 # raidr dependency graph:
 #   raidr_types -> raidr_processor -> raidr_client -> raidr_lib -> raidr_app
-#   raidr_crawler needs types + processor; raidr_cli and raidr_extension need
-#   processor; raidr_api needs types; raidr_web depends on nothing.
+#   raidr_cli needs processor; raidr_crawler needs types + processor + cli
+#   (it imports raidr_cli's reconstruct), so cli is published, and waited for,
+#   before the crawler; raidr_extension needs processor; raidr_api needs
+#   types; raidr_web depends on nothing.
 PROJECTS=(
     "../raidr_types:60"
     "../raidr_processor:60"
     "../raidr_client:60"
     "../raidr_lib:60"
+    "../raidr_cli:60"
     "../raidr_crawler:0"
-    "../raidr_cli:0"
     "../raidr_extension:0"
     "../raidr_api:0"
     "../raidr_app:0"

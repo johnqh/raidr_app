@@ -36,7 +36,7 @@ and `@sudobility/raidr_types` ^0.1.2 from npm.
 
 **Release.** `scripts/push_all.sh` (this repo) drives the whole raidr family, in
 order (`path:wait`): `raidr_types:60 → raidr_processor:60 → raidr_client:60 →
-raidr_lib:60 → raidr_crawler:0 → raidr_cli:0 → raidr_extension:0 → raidr_api:0 →
+raidr_lib:60 → raidr_cli:60 → raidr_crawler:0 → raidr_extension:0 → raidr_api:0 →
 raidr_app:0 → raidr_web:0`. It sources `../workflows/scripts/push_projects.sh`
 (or downloads it), which per repo updates `@sudobility` deps, validates, bumps
 the patch version, commits and pushes, and after a publish polls npm until the
@@ -56,7 +56,7 @@ where noted.
 | `bun run lint` | `eslint .` (ignores `dist`, `scripts`) | exit 0 |
 | `bun run test:unit` | Vitest once, happy-dom, `src/test/setup.ts` | 2 files, 2 tests pass |
 | `bun run build` | `tsc -b && vite build` → `dist/` | exit 0 |
-| `bun run dev` | Vite on http://localhost:5194 | served `/` and `/locales/en/app.json` (200) |
+| `bun run dev` | Vite on http://localhost:5144 | served `/` and `/locales/en/app.json` (200) |
 | `bun run preview` | serve `dist/` on :4173 | served `/` (200) |
 | `bun run format:check` | Prettier on `src/**/*.{ts,tsx,css}` | **exit 1: 14 files already unformatted** (not part of verify) |
 | `bun run format` | rewrite those files | not run (would reformat untouched code) |
@@ -158,7 +158,7 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
 | `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID`, `_MEASUREMENT_ID` | `initializeWebApp({ firebaseConfig })`: Analytics and Auth | **required**; the app shows a config notice without them |
 | `VITE_FIREBASE_PROXY` | `setFirebaseProxy` in `main.tsx` | unset |
 
-For a local raidr_api set `VITE_API_URL=http://localhost:3000`. The API must
+For a local raidr_api set `VITE_API_URL=http://localhost:8037`. The API must
 use the same Firebase project (`FIREBASE_PROJECT_ID`) to accept sign-ins.
 For a signed-out smoke test without a real project, placeholder values
 (`VITE_FIREBASE_API_KEY=AIza…`, `_PROJECT_ID`, `_APP_ID`) are enough.

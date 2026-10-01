@@ -79,7 +79,7 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: 5194,
+    port: 5144,
     watch: { ignored: ['!**/node_modules/@sudobility/**'] },
     fs: { allow: ['..'] },
   },
