@@ -33,7 +33,7 @@ PROJECTS=(
     "../raidr_processor:60"
     "../raidr_client:60"
     "../raidr_lib:60"
-    "../raidr_cli:60"
+    "../raidr_cli:180"
     "../raidr_crawler:0"
     "../raidr_extension:0"
     "../raidr_api:0"
