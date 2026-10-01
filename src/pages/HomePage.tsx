@@ -4,7 +4,7 @@ import { useRaidrMcps, useRaidrSites, useRaidrSkills } from '@sudobility/raidr_c
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 import { CopyBlock } from '@/components/CopyBlock';
-import { useApi } from '@/context/apiContextDef';
+import { useApi } from '@sudobility/building_blocks/firebase';
 import { CONSTANTS } from '@/config/constants';
 
 /** Linked count card; `—` until the count loads or if it fails. */

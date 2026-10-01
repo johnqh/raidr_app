@@ -1,17 +1,22 @@
 /**
  * @fileoverview Root component and route table.
  *
- * SudobilityApp supplies the providers (i18n, theme, network status, TanStack
- * Query, toasts, router) and its default PageTracker, which sends a Firebase
- * Analytics page_view per navigation. Every page is lazy-loaded and lives
- * under `/:lang`.
+ * SudobilityAppWithFirebaseAuthAndEntities supplies the providers: i18n,
+ * theme, TanStack Query, toasts, router, the Firebase Analytics page tracker,
+ * Firebase Auth (through AuthProviderWrapper), the API context (`useApi()`:
+ * a network client that adds the signed-in user's token), and
+ * CurrentEntityProvider for the selected organization. There is no
+ * subscription provider yet (pricing comes later). Every page lives under
+ * `/:lang`; the dashboard requires sign-in.
  */
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
-import { SudobilityApp } from '@sudobility/building_blocks';
+import { SudobilityAppWithFirebaseAuthAndEntities } from '@sudobility/building_blocks/firebase';
 import { LanguageRedirect, LanguageValidator } from '@sudobility/components';
 import i18n, { isLanguageSupported } from './i18n';
-import { ApiProvider } from './context/ApiContext';
+import { AuthProviderWrapper } from './components/providers/AuthProviderWrapper';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+import { CONSTANTS } from './config/constants';
 import ScreenContainer from './components/layout/ScreenContainer';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { Loading } from './components/PageState';
@@ -25,11 +30,13 @@ const SkillDetailPage = lazy(() => import('./pages/SkillDetailPage'));
 const SiteListPage = lazy(() => import('./pages/SiteListPage'));
 const SiteDetailPage = lazy(() => import('./pages/SiteDetailPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-
-/** App-specific providers SudobilityApp mounts inside its own (outside the router). */
-function AppProviders({ children }: { children: ReactNode }) {
-  return <ApiProvider>{children}</ApiProvider>;
-}
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const EntityRedirect = lazy(() => import('./components/layout/EntityRedirect'));
+const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'));
+const ApiKeysPage = lazy(() => import('./pages/dashboard/ApiKeysPage'));
+const WorkspacesPage = lazy(() => import('./pages/dashboard/WorkspacesPage'));
+const MembersPage = lazy(() => import('./pages/dashboard/MembersPage'));
+const InvitationsPage = lazy(() => import('./pages/dashboard/InvitationsPage'));
 
 /** Keeps `<html lang/dir>` in step with the active language. */
 function DocumentLanguageSync({ children }: { children: ReactNode }) {
@@ -92,6 +99,29 @@ function AppRoutes() {
                 <Route path="skills/:apiHost" element={<SkillDetailPage />} />
                 <Route path="sites" element={<SiteListPage />} />
                 <Route path="sites/:origin" element={<SiteDetailPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route
+                  path="dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <EntityRedirect />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="dashboard/:entitySlug"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="api-keys" replace />} />
+                  <Route path="api-keys" element={<ApiKeysPage />} />
+                  <Route path="workspaces" element={<WorkspacesPage />} />
+                  <Route path="members" element={<MembersPage />} />
+                  <Route path="invitations" element={<InvitationsPage />} />
+                </Route>
                 <Route path="404" element={<NotFoundPage />} />
                 <Route path="*" element={<NotFoundRedirect />} />
               </Route>
@@ -110,13 +140,15 @@ function AppRoutes() {
 /** Root component, rendered by main.tsx once initializeApp() has resolved. */
 export default function App() {
   return (
-    <SudobilityApp
+    <SudobilityAppWithFirebaseAuthAndEntities
       i18n={i18n}
-      AppProviders={AppProviders}
+      apiUrl={CONSTANTS.API_URL}
+      AuthProviderWrapper={AuthProviderWrapper}
+      EntityAwareSubscriptionProvider={false}
       LoadingFallback={Loading}
       storageKeyPrefix="raidr"
     >
       <AppRoutes />
-    </SudobilityApp>
+    </SudobilityAppWithFirebaseAuthAndEntities>
   );
 }

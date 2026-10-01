@@ -52,12 +52,14 @@
     "source": "Generated {{when}} from {{bundle}} by raidr-crawler {{version}}."
   },
   "connect": {
-    "intro": "Add the hosted endpoint to your MCP client. Your site token travels in the {{header}} header and is forwarded to the upstream API on every call; raidr never stores it.",
+    "intro": "Add the hosted endpoint to your MCP client with two headers: your raidr API key, and your own token for the site. raidr forwards the site token to the upstream API on every call and never stores either.",
     "endpoint": "MCP endpoint",
-    "tokenLabel": "Your token (optional, fills the snippets below)",
-    "tokenPlaceholder": "Paste the token from the skill instructions",
-    "noAuth": "This API needs no token.",
-    "cli": "One command"
+    "tokenLabel": "Your site token",
+    "tokenPlaceholder": "From the skill instructions",
+    "noAuth": "This API needs no site token.",
+    "cli": "One command",
+    "apiKeyLabel": "Your raidr API key",
+    "createKey": "Create an API key"
   },
   "skills": {
     "title": "Skills",
@@ -70,9 +72,8 @@
     "download": "Download SKILL.md",
     "openMcp": "Open the MCP server",
     "installTitle": "Install",
-    "installClaude": "Claude Code reads personal skills from ~/.claude/skills. Start a new session after installing.",
-    "installAgents": "Codex, Gemini CLI, Copilot CLI",
-    "contentTitle": "SKILL.md"
+    "contentTitle": "SKILL.md",
+    "installOne": "Run this once, then start a new Claude Code session. The first time the skill runs it asks for your raidr API key and saves it to ~/.raidr/config.json."
   },
   "sites": {
     "title": "Sites",
@@ -102,5 +103,24 @@
     "chunkError": "A new version of the app may be available. Please try again.",
     "genericError": "An unexpected error occurred. Please try again.",
     "tryAgain": "Try again"
+  },
+  "dashboard": {
+    "apiKeys": "API keys",
+    "workspaces": "Organizations",
+    "members": "Members",
+    "invitations": "Invitations",
+    "organization": "Organization",
+    "loadFailed": "Could not load your organizations",
+    "apiKeysIntro": "Use an API key to connect MCP clients to raidr, or paste it when a raidr skill asks for it. Keys belong to the organization, not to you, and are shown only once."
+  },
+  "signInPrompt": {
+    "title": "Sign in to see the full MCP server",
+    "description": "The tools, request mappings and connection setup are available to signed-in users. Sign in, create an API key for your organization, and connect any MCP client.",
+    "action": "Sign in",
+    "lang": "Free to sign up."
+  },
+  "login": {
+    "notConfigured": "Sign-in is not available",
+    "notConfiguredHint": "Firebase is not configured for this deployment."
   }
 }

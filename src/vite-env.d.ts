@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_COMPANY_NAME?: string;
   readonly VITE_SUPPORT_EMAIL?: string;
   readonly VITE_API_URL?: string;
+  /** Optional Firebase reverse proxy origin for regions where Firebase is blocked. */
+  readonly VITE_FIREBASE_PROXY?: string;
   // Firebase (Analytics only; Auth is not used)
   readonly VITE_FIREBASE_API_KEY: string;
   readonly VITE_FIREBASE_AUTH_DOMAIN: string;

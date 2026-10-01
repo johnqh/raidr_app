@@ -7,7 +7,7 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { CopyBlock } from '@/components/CopyBlock';
 import { Markdown } from '@/components/Markdown';
-import { useApi } from '@/context/apiContextDef';
+import { useApi } from '@sudobility/building_blocks/firebase';
 
 /** `/:lang/skills/:apiHost`: SKILL.md rendered, with download and install commands. */
 export default function SkillDetailPage() {
@@ -60,15 +60,11 @@ export default function SkillDetailPage() {
         </Heading>
         <Text color="muted" className="mb-2">
           {t(
-            'skill.installClaude',
-            'Claude Code reads personal skills from ~/.claude/skills. Start a new session after installing.'
+            'skill.installOne',
+            'Run this once, then start a new Claude Code session. The first time the skill runs it asks for your raidr API key and saves it to ~/.raidr/config.json.'
           )}
         </Text>
-        <CopyBlock code={install.claudeCurl} title="Claude Code" />
-        <CopyBlock
-          code={install.agentsCurl}
-          title={t('skill.installAgents', 'Codex, Gemini CLI, Copilot CLI')}
-        />
+        <CopyBlock code={install.command} />
       </Section>
 
       <Section spacing="md">

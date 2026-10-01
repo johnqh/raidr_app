@@ -5,7 +5,7 @@ import { useSite } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
-import { useApi } from '@/context/apiContextDef';
+import { useApi } from '@sudobility/building_blocks/firebase';
 
 /** `/:lang/sites/:origin`; the router decodes the URL-encoded origin. */
 export default function SiteDetailPage() {

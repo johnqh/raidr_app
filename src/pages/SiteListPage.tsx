@@ -5,7 +5,7 @@ import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
-import { useApi } from '@/context/apiContextDef';
+import { useApi } from '@sudobility/building_blocks/firebase';
 
 /** `/:lang/sites`: searchable list of crawled sites. */
 export default function SiteListPage() {

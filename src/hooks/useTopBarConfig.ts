@@ -1,18 +1,29 @@
-import { useMemo } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { MenuItemConfig, TopBarConfig } from '@sudobility/building_blocks';
+import type {
+  AuthActionProps,
+  AuthMenuItem,
+  MenuItemConfig,
+  TopBarConfig,
+} from '@sudobility/building_blocks';
+import { AuthAction, useAuthStatus } from '@sudobility/auth-components';
+import { useCurrentEntityOptional } from '@sudobility/entity_client';
 import { CubeIcon, DocumentTextIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { LinkWrapper } from '@/components/layout/LinkWrapper';
 import { useLocalizedNavigate } from '@/hooks/useLocalizedNavigate';
 import { isLanguageSupported, SUPPORTED_LANGUAGES } from '@/i18n';
 
 /**
- * Sticky `base` top bar with the three catalog links. The language selector
- * hides itself while only one language is supported.
+ * Sticky `firebase` top bar: the catalog links, a Sign in button when signed
+ * out, and an account menu (API keys, organizations, members, invitations)
+ * when signed in. The language selector hides itself while only one language
+ * is supported.
  */
 export function useTopBarConfig(): TopBarConfig {
   const { t } = useTranslation();
   const { navigate, switchLanguage, currentLanguage } = useLocalizedNavigate();
+  const { user } = useAuthStatus();
+  const entitySlug = useCurrentEntityOptional()?.currentEntitySlug;
 
   const menuItems: MenuItemConfig[] = useMemo(
     () => [
@@ -23,8 +34,32 @@ export function useTopBarConfig(): TopBarConfig {
     [t]
   );
 
+  const authenticatedMenuItems: AuthMenuItem[] = useMemo(() => {
+    if (!user) return [];
+    const base = entitySlug ? `/dashboard/${entitySlug}` : '/dashboard';
+    const go = (section: string) => () => navigate(entitySlug ? `${base}/${section}` : base);
+    return [
+      { id: 'api-keys', label: t('dashboard.apiKeys', 'API keys'), onClick: go('api-keys') },
+      {
+        id: 'workspaces',
+        label: t('dashboard.workspaces', 'Organizations'),
+        onClick: go('workspaces'),
+      },
+      { id: 'members', label: t('dashboard.members', 'Members'), onClick: go('members') },
+      {
+        id: 'invitations',
+        label: t('dashboard.invitations', 'Invitations'),
+        onClick: go('invitations'),
+        dividerAfter: true,
+      },
+    ];
+  }, [user, entitySlug, navigate, t]);
+
   return {
-    variant: 'base',
+    variant: 'firebase',
+    AuthActionComponent: AuthAction as ComponentType<AuthActionProps>,
+    onLoginClick: () => navigate('/login'),
+    authenticatedMenuItems,
     logo: { src: '/logo.png', appName: t('app.name', 'raidr'), onClick: () => navigate('/') },
     menuItems,
     currentLanguage,

@@ -55,7 +55,7 @@ export function initializeI18n(): void {
       lowerCaseLng: true,
       nonExplicitSupportedLngs: false,
       defaultNS: 'app',
-      ns: ['app'],
+      ns: ['app', 'auth'],
     });
 }
 

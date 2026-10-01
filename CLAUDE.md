@@ -5,8 +5,9 @@
 > explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
 > finishing a task is not permission to commit it.
 
-Read-only catalog UI for raidr. React 19 + Vite + Tailwind, `SudobilityApp`
-shell from `@sudobility/building_blocks`, Cloudflare Pages. Bun only. No CI
+Catalog UI and account dashboard for raidr. React 19 + Vite + Tailwind,
+`SudobilityAppWithFirebaseAuthAndEntities` shell from
+`@sudobility/building_blocks/firebase` (ported from shapeshyft_app), Cloudflare Pages. Bun only. No CI
 workflow on purpose; deploy with `bun run deploy`.
 
 ## Purpose and layer position
@@ -15,8 +16,20 @@ workflow on purpose; deploy with `bun run deploy`.
 raidr_types → raidr_client → raidr_lib → raidr_app (this repo)
 ```
 
-Public, login-free browser for published MCP servers, agent skills and crawled
-sites, with copy-ready connection and install commands. `package.json` is
+Browser for published MCP servers, agent skills and crawled sites, plus a
+signed-in dashboard for organizations and their API keys.
+
+| Surface | Signed out | Signed in |
+| --- | --- | --- |
+| MCP list, search | summaries | same |
+| MCP detail | summary + `SignInPrompt` | tools table + connect docs |
+| Skills list, detail, one-line `curl` install | yes | yes |
+| Sites | yes | yes |
+| `/dashboard/:entitySlug/*` | redirect to `/:lang/login` | API keys, workspaces, members, invitations |
+
+Developers sign up, create a `raidr_…` key under an organization, and use it
+against `https://api.raidr.app/mcp/<apiHost>`. A skill asks for that key on
+first run and keeps it in `~/.raidr/config.json`. `package.json` is
 `"private": true` (name `raidr_app`, version 0.1.1): nothing is published to
 npm. Depends on `@sudobility/raidr_lib` ^0.1.1, `@sudobility/raidr_client` ^0.1.0
 and `@sudobility/raidr_types` ^0.1.2 from npm.
@@ -60,21 +73,26 @@ src/
 ├── config/
 │   ├── initialize.ts         boot: theme CSS → initializeWebApp
 │   ├── constants.ts          CONSTANTS from VITE_* with defaults
-│   └── languages.ts          SUPPORTED_LANGUAGES = ['en'], isLanguageSupported
-├── context/
-│   ├── ApiContext.tsx        ApiProvider { networkClient, baseUrl }
-│   └── apiContextDef.ts      ApiContext, useApi()
+│   ├── languages.ts          SUPPORTED_LANGUAGES = ['en'], isLanguageSupported
+│   ├── auth-config.ts        auth-components texts from the `auth` namespace
+│   └── entityClient.ts       useEntityClient() for entity_pages
 ├── hooks/                    useTopBarConfig, useFooterConfig, useLocalizedNavigate, useDocumentLanguage
 ├── components/
 │   ├── PageState.tsx         Loading, EmptyState, ErrorState
 │   ├── SearchPagination.tsx  SearchBar (300 ms debounce), Pagination
-│   ├── ConnectDocs.tsx       endpoint, token input, Claude Code / Desktop / Cursor tabs
+│   ├── ConnectDocs.tsx       endpoint, API key + site token inputs, Claude Code / Desktop / Cursor tabs
+│   ├── SignInPrompt.tsx      shown on MCP detail when signed out
+│   ├── providers/AuthProviderWrapper.tsx  Firebase AuthProvider; config notice if Firebase is missing
 │   ├── ToolsTable.tsx        manifest tools
 │   ├── CopyBlock.tsx, Markdown.tsx
-│   └── layout/               ScreenContainer, Section, ErrorBoundary, LocalizedLink, LinkWrapper
+│   └── layout/               ScreenContainer, Section, ErrorBoundary, LocalizedLink, LinkWrapper,
+│                             ProtectedRoute, EntityRedirect
 ├── pages/                    one lazy default export per route (+ NotFoundPage.test.tsx)
+│   ├── LoginPage.tsx         building_blocks LoginPage; `?redirect=` must be a same-site path
+│   └── dashboard/            DashboardLayout + ApiKeys/Workspaces/Members/Invitations (entity_pages)
 └── test/setup.ts
 public/locales/en/app.json    all UI text
+public/locales/en/auth.json   sign-in texts
 public/_redirects             `/ /en 308`, SPA fallback `/* /index.html 200`
 scripts/push_all.sh           family release script (see above)
 wrangler.toml                 Pages project `raidr-app`, output `./dist`
@@ -92,27 +110,38 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
   - `initializeWebApp` order (from di_web source): storage → Firebase app →
     Firebase Analytics → network → info → (RevenueCat, skipped: no
     `revenueCatConfig`) → `initializeI18n` → `registerServiceWorker: true`.
-- `src/App.tsx`: `SudobilityApp` with its default page tracker (Firebase
-  Analytics `page_view`) and `AppProviders` = `ApiProvider`. Routes sit under
-  `/:lang` behind `LanguageValidator` / `LanguageRedirect`. SudobilityApp also
-  provides the QueryClient, theme, toasts, network status and router.
-- `src/context/ApiContext.tsx` supplies `{ networkClient, baseUrl }` from
-  `@sudobility/di/web` and `VITE_API_URL`; every page passes it to
-  `raidr_lib` hooks.
+- `src/main.tsx` also calls `setFirebaseProxy(VITE_FIREBASE_PROXY)` when set.
+- `src/App.tsx`: `SudobilityAppWithFirebaseAuthAndEntities` with
+  `apiUrl={CONSTANTS.API_URL}`, `AuthProviderWrapper`,
+  `EntityAwareSubscriptionProvider={false}` (no pricing yet),
+  `storageKeyPrefix="raidr"`. It provides the QueryClient, theme, toasts,
+  router, page tracker, Firebase Auth, `ApiProvider` and
+  `CurrentEntityProvider`. Routes sit under `/:lang` behind
+  `LanguageValidator` / `LanguageRedirect`.
+- `useApi()` comes from `@sudobility/building_blocks/firebase`. Its
+  `networkClient` adds the Firebase ID token when someone is signed in, so
+  the same raidr_lib hooks return the full manifest after sign-in. Pages pass
+  `{ networkClient, baseUrl }` and `isAuthenticated` (from auth-components'
+  `useAuthStatus`) to raidr_lib hooks.
 - Layout: `ScreenContainer` → `AppPageLayout` with a `base` top bar and a
   compact footer. Each page wraps content in `Section` (max-w-7xl, padded).
 
 ## Rules
 
-- Firebase Analytics is always on (via di_web). Firebase Auth and
-  subscriptions are not used: never add `SudobilityAppWithFirebaseAuth`,
-  `auth_lib` or RevenueCat.
+- Firebase is required. Analytics is always on (via di_web) and Auth uses the
+  same app. Without `VITE_FIREBASE_*` the app renders a configuration notice
+  instead of pages, because building_blocks' ApiProvider and `useAuthStatus`
+  need an AuthProvider. Subscriptions and RevenueCat are not used yet.
+- Signed-out views must only use summary data (`useMcp().summary`). The full
+  manifest is fetched only when `isAuthenticated`; the API enforces the same
+  rule with a 401.
+- The skill page shows exactly one install command (`install.command`).
 - Data and derived state come from `@sudobility/raidr_lib` hooks; components
   only render. Presentation helpers for tools live in raidr_lib too.
   (Exception today: `HomePage` calls raidr_client's list hooks with `limit: 1`
   just to read `pagination.totalCount`.)
-- The token typed on an MCP page stays in component state and only fills the
-  copy snippets.
+- The API key and site token typed on an MCP page stay in component state
+  and only fill the copy snippets. A created key is shown once by entity_pages.
 - Prose goes in `public/locales/en/app.json` with a default in the `t()` call.
   Every `t()` key in `src/` currently exists in `app.json` and vice versa.
 - Grid children need `[&>*]:min-w-0` so wide code blocks do not break mobile.
@@ -126,9 +155,13 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
 | `VITE_API_URL` | `CONSTANTS.API_URL` → `ApiProvider` (every data hook) and the HomePage example | `https://api.raidr.app` (trailing `/` stripped) |
 | `VITE_COMPANY_NAME` | `CONSTANTS.COMPANY_NAME` → footer | `Sudobility` |
 | `VITE_APP_NAME`, `VITE_APP_DOMAIN`, `VITE_SUPPORT_EMAIL` | `CONSTANTS` only; nothing reads them yet | `raidr`, `raidr.app`, `support@raidr.app` |
-| `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID`, `_MEASUREMENT_ID` | `initializeWebApp({ firebaseConfig })` (Analytics only) | none |
+| `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID`, `_MEASUREMENT_ID` | `initializeWebApp({ firebaseConfig })`: Analytics and Auth | **required**; the app shows a config notice without them |
+| `VITE_FIREBASE_PROXY` | `setFirebaseProxy` in `main.tsx` | unset |
 
-For a local raidr_api set `VITE_API_URL=http://localhost:3000`.
+For a local raidr_api set `VITE_API_URL=http://localhost:3000`. The API must
+use the same Firebase project (`FIREBASE_PROJECT_ID`) to accept sign-ins.
+For a signed-out smoke test without a real project, placeholder values
+(`VITE_FIREBASE_API_KEY=AIza…`, `_PROJECT_ID`, `_APP_ID`) are enough.
 
 ## Routes (`App.tsx`, all pages lazy)
 
@@ -137,11 +170,14 @@ For a local raidr_api set `VITE_API_URL=http://localhost:3000`.
 | `/` | `LanguageRedirect` (Pages also 308s `/` → `/en`) | — |
 | `/:lang` | `HomePage` | `useRaidrMcps/Skills/Sites({ limit: 1 })` |
 | `/:lang/mcps` | `McpListPage` | `useMcpCatalog` |
-| `/:lang/mcps/:apiHost` | `McpDetailPage` | `useMcp` + `useSiteCatalog({ apiHost })` |
+| `/:lang/mcps/:apiHost` | `McpDetailPage` | `useMcp({ isAuthenticated })` + `useSiteCatalog({ apiHost })` |
 | `/:lang/skills` | `SkillListPage` | `useSkillCatalog` |
 | `/:lang/skills/:apiHost` | `SkillDetailPage` | `useSkill` |
 | `/:lang/sites` | `SiteListPage` | `useSiteCatalog` |
 | `/:lang/sites/:origin` | `SiteDetailPage` | `useSite` (origin decoded by the router) |
+| `/:lang/login` | `LoginPage` | Firebase Auth |
+| `/:lang/dashboard` | `ProtectedRoute` → `EntityRedirect` | first entity → `dashboard/:slug/api-keys` |
+| `/:lang/dashboard/:entitySlug/{api-keys,workspaces,members,invitations}` | `DashboardLayout` + page | entity_pages via `useEntityClient` |
 | `/:lang/404` | `NotFoundPage` | — |
 | `/:lang/*` | `NotFoundRedirect` → `/:lang/404` | — |
 | `*` (bad language) | `LanguageRedirect` | — |
@@ -192,9 +228,14 @@ next `bun install` restores the npm copy; ship only against published versions.
   catalog filter stores.
 - `format:check` fails on 14 existing files; `verify` does not run it. Do not
   reformat untouched files as a side effect.
-- `src/` imports none of `@sudobility/auth-components`, `subscription-components`,
-  `subscription_lib`, `entity_client`, `devops-components`; they match optional
-  peers of building_blocks. Check the build before removing any.
+- `src/` imports none of `subscription-components`, `subscription_lib`,
+  `devops-components`; they match optional peers of building_blocks. Check
+  the build before removing any.
+- `tailwind.config.js` content paths include auth-components,
+  entity-components and entity_pages; without them their classes are purged.
+- Never call auth-components' `useAuthStatus` outside the AuthProvider tree;
+  it throws. Anything rendered by `AuthProviderWrapper`'s config notice must
+  not use it.
 - `.npmrc` sets `legacy-peer-deps=true` and reads `NPM_TOKEN`.
 - `ErrorBoundary` is a class and calls `i18n.t` directly (no hooks in classes).
 - `SearchBar` seeds its draft from `search` once; it does not re-sync if the
