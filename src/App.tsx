@@ -10,7 +10,7 @@
  * `/:lang`; the dashboard requires sign-in.
  */
 import { lazy, Suspense, type ReactNode } from 'react';
-import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom';
 import { SudobilityAppWithFirebaseAuthAndEntities } from '@sudobility/building_blocks/firebase';
 import { LanguageRedirect, LanguageValidator } from '@sudobility/components';
 import i18n, { isLanguageSupported } from './i18n';
@@ -21,6 +21,7 @@ import ScreenContainer from './components/layout/ScreenContainer';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
 import { Loading } from './components/PageState';
 import { useDocumentLanguage } from './hooks/useDocumentLanguage';
+import { links, skillSlugFor } from './config/links';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const McpListPage = lazy(() => import('./pages/McpListPage'));
@@ -28,6 +29,9 @@ const McpDetailPage = lazy(() => import('./pages/McpDetailPage'));
 const SkillListPage = lazy(() => import('./pages/SkillListPage'));
 const SkillDetailPage = lazy(() => import('./pages/SkillDetailPage'));
 const SiteListPage = lazy(() => import('./pages/SiteListPage'));
+const DomainsPage = lazy(() => import('./pages/DomainsPage'));
+const ApiPage = lazy(() => import('./pages/ApiPage'));
+const EndpointPage = lazy(() => import('./pages/EndpointPage'));
 const SiteDetailPage = lazy(() => import('./pages/SiteDetailPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -42,6 +46,32 @@ const InvitationsPage = lazy(() => import('./pages/dashboard/InvitationsPage'));
 function DocumentLanguageSync({ children }: { children: ReactNode }) {
   useDocumentLanguage();
   return <>{children}</>;
+}
+
+/** `/mcps` is the browser; `/mcps?domain={apiHost}` the inspector. */
+function McpsRoute() {
+  const [params] = useSearchParams();
+  const domain = params.get('domain');
+  return domain ? <McpDetailPage apiHost={domain} /> : <McpListPage />;
+}
+
+/** `/skills` is the browser; `/skills?skill={slug}` the inspector. */
+function SkillsRoute() {
+  const [params] = useSearchParams();
+  const slug = params.get('skill');
+  return slug ? <SkillDetailPage slug={slug} /> : <SkillListPage />;
+}
+
+/** Old `/mcps/:apiHost` links. */
+function LegacyMcpRedirect() {
+  const { lang = 'en', apiHost = '' } = useParams();
+  return <Navigate to={`/${lang}${links.mcp(apiHost)}`} replace />;
+}
+
+/** Old `/skills/:apiHost` links: the slug is derived from the host. */
+function LegacySkillRedirect() {
+  const { lang = 'en', apiHost = '' } = useParams();
+  return <Navigate to={`/${lang}${links.skill(skillSlugFor(apiHost))}`} replace />;
 }
 
 /** Unknown path under a valid language: redirect to that language's 404 page. */
@@ -93,10 +123,13 @@ function AppRoutes() {
             >
               <Route element={<ScreenContainerLayout />}>
                 <Route index element={<HomePage />} />
-                <Route path="mcps" element={<McpListPage />} />
-                <Route path="mcps/:apiHost" element={<McpDetailPage />} />
-                <Route path="skills" element={<SkillListPage />} />
-                <Route path="skills/:apiHost" element={<SkillDetailPage />} />
+                <Route path="domains" element={<DomainsPage />} />
+                <Route path="api" element={<ApiPage />} />
+                <Route path="endpoint" element={<EndpointPage />} />
+                <Route path="mcps" element={<McpsRoute />} />
+                <Route path="mcps/:apiHost" element={<LegacyMcpRedirect />} />
+                <Route path="skills" element={<SkillsRoute />} />
+                <Route path="skills/:apiHost" element={<LegacySkillRedirect />} />
                 <Route path="sites" element={<SiteListPage />} />
                 <Route path="sites/:origin" element={<SiteDetailPage />} />
                 <Route path="login" element={<LoginPage />} />

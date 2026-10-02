@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert, Badge, Button, Heading, Text } from '@sudobility/components';
 import { useMcp, useSiteCatalog } from '@sudobility/raidr_lib';
@@ -11,15 +10,15 @@ import { ConnectDocs } from '@/components/ConnectDocs';
 import { SignInPrompt } from '@/components/SignInPrompt';
 import { useApi } from '@sudobility/building_blocks/firebase';
 import { useAuthStatus } from '@sudobility/auth-components';
+import { links } from '@/config/links';
 
 /**
- * `/:lang/mcps/:apiHost`. Everyone sees the public summary; signed-in users
+ * `/:lang/mcps?domain={apiHost}`. Everyone sees the public summary; signed-in users
  * also get the tools and connection setup, everyone else a sign-in prompt.
  * The typed API key and site token only rebuild the snippets via useMcp.
  */
-export default function McpDetailPage() {
+export default function McpDetailPage({ apiHost }: { apiHost: string }) {
   const { t } = useTranslation();
-  const { apiHost = '' } = useParams();
   const { networkClient, baseUrl } = useApi();
   const { user, loading: authLoading } = useAuthStatus();
   const [apiKey, setApiKey] = useState('');
@@ -58,7 +57,19 @@ export default function McpDetailPage() {
               </Text>
             ) : null}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            <LocalizedLink to={links.api(apiHost)}>
+              <Button size="sm" variant="outline">
+                {t('mcp.apiLink', 'API')}
+              </Button>
+            </LocalizedLink>
+            {skill ? (
+              <LocalizedLink to={links.skill(skill.name)}>
+                <Button size="sm" variant="outline">
+                  {t('mcp.skillLink', 'Skill')}
+                </Button>
+              </LocalizedLink>
+            ) : null}
             {manifest ? (
               <Badge variant="default" pill>
                 {t('mcp.auth', 'auth: {{style}}', { style: manifest.auth.style })}
@@ -80,7 +91,7 @@ export default function McpDetailPage() {
             className="mt-6"
             title={t('mcp.skillTitle', 'A skill explains how to get a token for this API')}
           >
-            <LocalizedLink to={`/skills/${encodeURIComponent(apiHost)}`}>
+            <LocalizedLink to={links.skill(skill.name)}>
               <Button size="sm" variant="outline">
                 {t('mcp.openSkill', 'Open the skill')}
               </Button>

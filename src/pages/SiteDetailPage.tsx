@@ -6,6 +6,7 @@ import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { useApi } from '@sudobility/building_blocks/firebase';
+import { links } from '@/config/links';
 
 /** `/:lang/sites/:origin`; the router decodes the URL-encoded origin. */
 export default function SiteDetailPage() {
@@ -53,7 +54,7 @@ export default function SiteDetailPage() {
       ) : (
         <div className="grid gap-3 md:grid-cols-2 [&>*]:min-w-0">
           {apiHosts.map(host => (
-            <LocalizedLink key={host} to={`/mcps/${encodeURIComponent(host)}`} className="block">
+            <LocalizedLink key={host} to={links.api(host)} className="block">
               <Card
                 variant="bordered"
                 padding="md"

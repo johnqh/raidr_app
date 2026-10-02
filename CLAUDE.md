@@ -16,8 +16,10 @@ workflow on purpose; deploy with `bun run deploy`.
 raidr_types → raidr_client → raidr_lib → raidr_app (this repo)
 ```
 
-Browser for published MCP servers, agent skills and crawled sites, plus a
-signed-in dashboard for organizations and their API keys.
+Browser for published MCP servers, agent skills, websites and their API
+domains, an API playground (endpoint docs, a flow map, and "try it" requests
+through raidr_api's execute proxy), plus a signed-in dashboard for
+organizations and their API keys.
 
 | Surface | Signed out | Signed in |
 | --- | --- | --- |
@@ -25,18 +27,21 @@ signed-in dashboard for organizations and their API keys.
 | MCP detail | summary + `SignInPrompt` | tools table + connect docs |
 | Skills list, detail, one-line `curl` install | yes | yes |
 | Sites | yes | yes |
+| Domains (websites → API domains) | yes | yes |
+| API page (`/api?domain=`) | summary + `SignInPrompt` | endpoint list by tag + flow map |
+| Endpoint playground (`/endpoint?endpoint=`) | `SignInPrompt` | params form, credentials, Execute, response |
 | `/dashboard/:entitySlug/*` | redirect to `/:lang/login` | API keys, workspaces, members, invitations |
 
 Developers sign up, create a `raidr_…` key under an organization, and use it
 against `https://api.raidr.app/mcp/<apiHost>`. A skill asks for that key on
 first run and keeps it in `~/.raidr/config.json`. `package.json` is
-`"private": true` (name `raidr_app`, version 0.1.1): nothing is published to
-npm. Depends on `@sudobility/raidr_lib` ^0.1.1, `@sudobility/raidr_client` ^0.1.0
-and `@sudobility/raidr_types` ^0.1.2 from npm.
+`"private": true` (name `raidr_app`, version 0.1.6): nothing is published to
+npm. Depends on `@sudobility/raidr_lib` ^0.1.6, `@sudobility/raidr_client` ^0.1.4
+and `@sudobility/raidr_types` ^0.1.6 from npm.
 
 **Release.** `scripts/push_all.sh` (this repo) drives the whole raidr family, in
 order (`path:wait`): `raidr_types:60 → raidr_processor:60 → raidr_client:60 →
-raidr_lib:60 → raidr_cli:60 → raidr_crawler:0 → raidr_extension:0 → raidr_api:0 →
+raidr_lib:60 → raidr_cli:180 → raidr_crawler:0 → raidr_extension:0 → raidr_api:0 →
 raidr_app:0 → raidr_web:0`. It sources `../workflows/scripts/push_projects.sh`
 (or downloads it), which per repo updates `@sudobility` deps, validates, bumps
 the patch version, commits and pushes, and after a publish polls npm until the
@@ -75,6 +80,7 @@ src/
 │   ├── constants.ts          CONSTANTS from VITE_* with defaults
 │   ├── languages.ts          SUPPORTED_LANGUAGES = ['en'], isLanguageSupported
 │   ├── auth-config.ts        auth-components texts from the `auth` namespace
+│   ├── links.ts              `links.*` builds every internal catalog URL; skillSlugFor(apiHost)
 │   └── entityClient.ts       useEntityClient() for entity_pages
 ├── hooks/                    useTopBarConfig, useFooterConfig, useLocalizedNavigate, useDocumentLanguage
 ├── components/
@@ -85,6 +91,9 @@ src/
 │   ├── providers/AuthProviderWrapper.tsx  Firebase AuthProvider; config notice if Firebase is missing
 │   ├── ToolsTable.tsx        manifest tools
 │   ├── CopyBlock.tsx, Markdown.tsx
+│   ├── api/                  MethodBadge, AuthBadge, ParamField (enum → Select, text → Input with
+│   │                         validation, Switch, JSON TextArea), CredentialPanel (login popup, token /
+│   │                         key fields, Remember), ResponseView, FlowMap (@xyflow/react)
 │   └── layout/               ScreenContainer, Section, ErrorBoundary, LocalizedLink, LinkWrapper,
 │                             ProtectedRoute, EntityRedirect
 ├── pages/                    one lazy default export per route (+ NotFoundPage.test.tsx)
@@ -147,6 +156,13 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
 - Grid children need `[&>*]:min-w-0` so wide code blocks do not break mobile.
 - Internal links use `LocalizedLink` (or `useLocalizedNavigate`) with a
   language-less path (`/mcps`); route params are `encodeURIComponent`-ed.
+  Catalog URLs come from `links.*` in `src/config/links.ts`; do not build
+  `/api?…`, `/endpoint?…`, `/mcps?…` or `/skills?…` strings by hand.
+- Credentials typed on the endpoint playground are the upstream site's token
+  and application key. raidr_lib keeps them in `localStorage` per API host
+  (unless Remember is off); they leave the browser only inside the execute
+  request. The API page and playground fetch the doc and flow only when
+  signed in.
 
 ## Environment (`.env`, gitignored; template `.env.example`)
 
@@ -169,10 +185,14 @@ For a signed-out smoke test without a real project, placeholder values
 | --- | --- | --- |
 | `/` | `LanguageRedirect` (Pages also 308s `/` → `/en`) | — |
 | `/:lang` | `HomePage` | `useRaidrMcps/Skills/Sites({ limit: 1 })` |
-| `/:lang/mcps` | `McpListPage` | `useMcpCatalog` |
-| `/:lang/mcps/:apiHost` | `McpDetailPage` | `useMcp({ isAuthenticated })` + `useSiteCatalog({ apiHost })` |
-| `/:lang/skills` | `SkillListPage` | `useSkillCatalog` |
-| `/:lang/skills/:apiHost` | `SkillDetailPage` | `useSkill` |
+| `/:lang/domains` | `DomainsPage` | `useDomains` (expand a website to see its API domains) |
+| `/:lang/api?domain={apiHost}` | `ApiPage` | `useApiInspector({ isAuthenticated })`: endpoints, flow map, MCP / skill links |
+| `/:lang/endpoint?endpoint={ref}` | `EndpointPage` | `useEndpointPlayground`; `ref` = encoded `METHOD https://host/path` |
+| `/:lang/mcps` | `McpsRoute` → `McpListPage` | `useMcpCatalog` |
+| `/:lang/mcps?domain={apiHost}` | `McpsRoute` → `McpDetailPage` | `useMcp({ isAuthenticated })` + `useSiteCatalog({ apiHost })` |
+| `/:lang/skills` | `SkillsRoute` → `SkillListPage` | `useSkillCatalog` |
+| `/:lang/skills?skill={slug}` | `SkillsRoute` → `SkillDetailPage` | `useSkillBySlug` |
+| `/:lang/mcps/:apiHost`, `/:lang/skills/:apiHost` | `LegacyMcpRedirect` / `LegacySkillRedirect` | replace-redirect to the query forms (skill slug from `skillSlugFor`) |
 | `/:lang/sites` | `SiteListPage` | `useSiteCatalog` |
 | `/:lang/sites/:origin` | `SiteDetailPage` | `useSite` (origin decoded by the router) |
 | `/:lang/login` | `LoginPage` | Firebase Auth |
@@ -212,7 +232,8 @@ page's Suspense, and says "new version" for a failed lazy chunk.
 5. **raidr_app**: `src/pages/XPage.tsx` (default export, `useApi()` → hook,
    Loading/ErrorState/EmptyState), a `lazy()` import and `<Route>` in `App.tsx`,
    strings in `public/locales/en/app.json` with the same defaults in `t()`, a
-   nav entry in `useTopBarConfig`/`useFooterConfig` if it is top-level.
+   nav entry in `useTopBarConfig`/`useFooterConfig` if it is top-level, and
+   a builder in `src/config/links.ts` if other pages link to it.
 6. `bun run verify`; open the page in `bun run dev` at desktop and phone widths.
 
 **Trying an unpublished raidr_lib/raidr_client.** Build it there, then replace
@@ -240,3 +261,18 @@ next `bun install` restores the npm copy; ship only against published versions.
 - `ErrorBoundary` is a class and calls `i18n.t` directly (no hooks in classes).
 - `SearchBar` seeds its draft from `search` once; it does not re-sync if the
   store's search changes elsewhere.
+- `src/components/layout/LocalizedLink.tsx` adds the language prefix itself.
+  The shared `@sudobility/components` `LocalizedLink` checks
+  `to.startsWith('/en')` as a plain string, so `/endpoint?…` was taken as
+  already prefixed and rendered without a language. Keep the local wrapper.
+- react-flow's stylesheet (`@xyflow/react/dist/style.css`) fixes default
+  nodes at 150px wide, so `FlowMap` sets the tile width (`TILE_WIDTH`, 240)
+  with an inline `style`; a Tailwind width class loses.
+- `FlowMap` tile colors: this API's endpoints use the card color (click opens
+  the playground), endpoints on other API domains are amber (click opens that
+  API page), the log-in step is emerald. Auth links are dashed, inferred
+  links faint.
+- `SignInPrompt`'s `redirect` keeps `location.search`: the API page and
+  playground live in the query string.
+- The top bar lists Domains, MCP servers, Skills; Sites moved to the footer
+  only.

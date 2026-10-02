@@ -2,7 +2,9 @@
 
 Public web app for browsing raidr MCP servers and agent skills, with
 connection docs for Claude Code, Claude Desktop and Cursor, and install docs
-for each skill.
+for each skill. It also documents each API domain: a Swagger-like playground
+lists its endpoints with typed parameters, runs requests through raidr_api,
+and draws a flow map of which endpoints feed which.
 
 React 19 + Vite + Tailwind on the `@sudobility` building blocks, deployed to
 Cloudflare Pages. Firebase Auth with organizational entities: browsing MCPs
@@ -15,11 +17,19 @@ a key to connect any MCP client to `https://api.raidr.app/mcp/<apiHost>`.
 | Path | Page |
 | --- | --- |
 | `/:lang` | home: counts and a how-it-works walkthrough |
-| `/:lang/mcps`, `/:lang/mcps/:apiHost` | MCP catalog; detail shows the summary signed out, and tools plus connection snippets signed in |
-| `/:lang/skills`, `/:lang/skills/:apiHost` | skill catalog; detail renders SKILL.md with a one-line install command |
+| `/:lang/domains` | websites, each expanding to the API domains it uses |
+| `/:lang/api?domain={apiHost}` | API page: endpoints grouped by tag and a flow map (signed in), links to its MCP server and skill |
+| `/:lang/endpoint?endpoint={ref}` | endpoint playground: docs, parameter inputs, credentials, Execute and the response (signed in); `ref` is the encoded `METHOD https://host/path` |
+| `/:lang/mcps`, `/:lang/mcps?domain={apiHost}` | MCP catalog; detail shows the summary signed out, and tools plus connection snippets signed in |
+| `/:lang/skills`, `/:lang/skills?skill={slug}` | skill catalog; detail renders SKILL.md with a one-line install command |
 | `/:lang/sites`, `/:lang/sites/:origin` | crawled sites and the API hosts they call (origin is URL-encoded) |
 | `/:lang/login` | sign in (Google or email) |
+| `/:lang/mcps/:apiHost`, `/:lang/skills/:apiHost` | old links; redirect to the query forms |
 | `/:lang/dashboard/:entitySlug/{api-keys,workspaces,members,invitations}` | account dashboard, signed in only |
+
+Credentials entered in the playground (a site token or an application key)
+are remembered in this browser per API domain and sent only with the request
+you execute; raidr never stores them.
 
 ## Run
 

@@ -6,6 +6,7 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@sudobility/building_blocks/firebase';
+import { links } from '@/config/links';
 
 /** `/:lang/skills`: searchable skill catalog. */
 export default function SkillListPage() {
@@ -38,11 +39,7 @@ export default function SkillListPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6 [&>*]:min-w-0">
           {catalog.items.map(skill => (
-            <LocalizedLink
-              key={skill.api_host}
-              to={`/skills/${encodeURIComponent(skill.api_host)}`}
-              className="block"
-            >
+            <LocalizedLink key={skill.api_host} to={links.skill(skill.name)} className="block">
               <Card
                 variant="bordered"
                 padding="md"

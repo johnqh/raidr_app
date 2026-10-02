@@ -1,27 +1,29 @@
-import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Heading, Text } from '@sudobility/components';
-import { useSkill } from '@sudobility/raidr_lib';
+import { useSkillBySlug } from '@sudobility/raidr_lib';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { CopyBlock } from '@/components/CopyBlock';
 import { Markdown } from '@/components/Markdown';
 import { useApi } from '@sudobility/building_blocks/firebase';
+import { links } from '@/config/links';
 
-/** `/:lang/skills/:apiHost`: SKILL.md rendered, with download and install commands. */
-export default function SkillDetailPage() {
+/** `/:lang/skills?skill={slug}`: SKILL.md rendered, with the install command and links to its API and MCP. */
+export default function SkillDetailPage({ slug }: { slug: string }) {
   const { t } = useTranslation();
-  const { apiHost = '' } = useParams();
   const api = useApi();
-  const { skill, install, hasMcp, isLoading, notFound, error } = useSkill({ ...api, apiHost });
+  const { skill, install, hasMcp, apiHost, isLoading, notFound, error } = useSkillBySlug({
+    ...api,
+    slug,
+  });
 
   if (isLoading) return <Loading />;
   if (error) return <ErrorState error={error} />;
   if (notFound || !skill || !install) {
     return (
       <EmptyState
-        title={t('skill.notFound', 'No skill published for {{host}}', { host: apiHost })}
+        title={t('skill.notFound', 'No skill published for {{host}}', { host: apiHost || slug })}
       />
     );
   }
@@ -45,9 +47,12 @@ export default function SkillDetailPage() {
             <a href={install.markdownUrl} download="SKILL.md">
               <Button>{t('skill.download', 'Download SKILL.md')}</Button>
             </a>
+            <LocalizedLink to={links.api(apiHost)}>
+              <Button variant="outline">{t('skill.apiLink', 'API')}</Button>
+            </LocalizedLink>
             {hasMcp ? (
-              <LocalizedLink to={`/mcps/${encodeURIComponent(apiHost)}`}>
-                <Button variant="outline">{t('skill.openMcp', 'Open the MCP server')}</Button>
+              <LocalizedLink to={links.mcp(apiHost)}>
+                <Button variant="outline">{t('skill.mcpLink', 'MCP')}</Button>
               </LocalizedLink>
             ) : null}
           </div>

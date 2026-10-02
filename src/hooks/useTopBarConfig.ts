@@ -27,9 +27,9 @@ export function useTopBarConfig(): TopBarConfig {
 
   const menuItems: MenuItemConfig[] = useMemo(
     () => [
+      { id: 'domains', label: t('nav.domains', 'Domains'), icon: GlobeAltIcon, href: '/domains' },
       { id: 'mcps', label: t('nav.mcps', 'MCP servers'), icon: CubeIcon, href: '/mcps' },
       { id: 'skills', label: t('nav.skills', 'Skills'), icon: DocumentTextIcon, href: '/skills' },
-      { id: 'sites', label: t('nav.sites', 'Sites'), icon: GlobeAltIcon, href: '/sites' },
     ],
     [t]
   );

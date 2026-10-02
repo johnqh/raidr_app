@@ -5,7 +5,8 @@
   "nav": {
     "mcps": "MCP servers",
     "skills": "Skills",
-    "sites": "Sites"
+    "sites": "Sites",
+    "domains": "Domains"
   },
   "footer": {
     "rightsText": "All rights reserved"
@@ -49,7 +50,9 @@
     "inputs": "Inputs",
     "description": "Description",
     "mutates": "mutates",
-    "source": "Generated {{when}} from {{bundle}} by raidr-crawler {{version}}."
+    "source": "Generated {{when}} from {{bundle}} by raidr-crawler {{version}}.",
+    "apiLink": "API",
+    "skillLink": "Skill"
   },
   "connect": {
     "intro": "Add the hosted endpoint to your MCP client with two headers: your raidr API key, and your own token for the site. raidr forwards the site token to the upstream API on every call and never stores either.",
@@ -73,7 +76,9 @@
     "openMcp": "Open the MCP server",
     "installTitle": "Install",
     "contentTitle": "SKILL.md",
-    "installOne": "Run this once, then start a new Claude Code session. The first time the skill runs it asks for your raidr API key and saves it to ~/.raidr/config.json."
+    "installOne": "Run this once, then start a new Claude Code session. The first time the skill runs it asks for your raidr API key and saves it to ~/.raidr/config.json.",
+    "apiLink": "API",
+    "mcpLink": "MCP"
   },
   "sites": {
     "title": "Sites",
@@ -122,5 +127,95 @@
   "login": {
     "notConfigured": "Sign-in is not available",
     "notConfiguredHint": "Firebase is not configured for this deployment."
+  },
+  "param": {
+    "backToList": "Pick from list",
+    "choose": "Choose…",
+    "notSent": "(not sent)",
+    "other": "Other…",
+    "listHint": "Separate values with commas."
+  },
+  "api": {
+    "result": {
+      "time": "{{ms}} ms",
+      "hideHeaders": "Hide headers",
+      "showHeaders": "Show headers",
+      "empty": "Empty body.",
+      "truncated": "The body was cut off at 1 MB."
+    },
+    "auth": {
+      "user": "User auth",
+      "apiKey": "API key",
+      "none": "No auth"
+    },
+    "cred": {
+      "none": "This endpoint needs no credentials.",
+      "signIn": "Sign in to {{site}}",
+      "signInHint": "Opens the site in a small window. Sign in there, then paste your token below.",
+      "whereTitle": "Where to find your token",
+      "cookie": "Session cookie ({{name}})",
+      "header": "Token ({{name}} header)",
+      "bearer": "Bearer token",
+      "paste": "Paste the token here",
+      "key": "API key ({{where}} \"{{name}}\")",
+      "query": "query parameter",
+      "headerWord": "header",
+      "remember": "Remember in this browser",
+      "rememberHint": "Kept on this device only and sent to raidr only when you press Execute."
+    },
+    "kicker": "API domain",
+    "mcpLink": "MCP",
+    "skillLink": "Skill",
+    "notFound": "No endpoint documentation for {{host}} yet",
+    "signInTitle": "Sign in to browse and try the endpoints",
+    "signInDescription": "Endpoint documentation and the request playground are available to signed-in users. It is free to sign up.",
+    "endpointsTitle": "Endpoints ({{count}})",
+    "version": "Version {{v}}",
+    "flowTitle": "How the endpoints connect",
+    "flowSubtitle": "Which calls supply the data (ids, tokens) other calls need. Click a tile to open it."
+  },
+  "domains": {
+    "title": "Websites",
+    "subtitle": "Each website and the API domains it uses. Open an API domain to browse and try its endpoints.",
+    "search": "Filter by domain",
+    "empty": "No websites match",
+    "apiCount": "{{count}} API domains"
+  },
+  "endpoint": {
+    "signInTitle": "Sign in to try this endpoint",
+    "signInDescription": "The playground runs requests through raidr for signed-in users. It is free to sign up.",
+    "notFound": "Endpoint not found",
+    "loc": {
+      "path": "Path parameters",
+      "query": "Query parameters",
+      "header": "Headers",
+      "body": "Request body"
+    },
+    "authTitle": "Authentication",
+    "paramsTitle": "Parameters",
+    "noParams": "This endpoint takes no parameters.",
+    "extraBody": "More body fields (JSON)",
+    "rawBody": "Body fields (JSON)",
+    "extraBodyHint": "The fields this endpoint accepts are not all documented. Add any as a JSON object.",
+    "responsesTitle": "Responses",
+    "fields": "Fields: {{fields}}",
+    "example": "Example",
+    "executing": "Running…",
+    "execute": "Execute",
+    "reset": "Clear",
+    "noToken": "No token entered: the API will likely answer 401.",
+    "noKey": "No API key entered: the API will likely refuse the request.",
+    "fixErrors": "Fix the highlighted fields first.",
+    "failed": "The request could not be run"
+  },
+  "flow": {
+    "empty": "No flow between endpoints is known for this API yet.",
+    "legend": {
+      "login": "Log in",
+      "endpoint": "This API (opens the playground)",
+      "external": "Another API domain (opens its page)",
+      "lines": "Dashed: credential. Faint: inferred from the API’s shape."
+    },
+    "hidden": "{{count}} less connected endpoints are not shown."
   }
 }

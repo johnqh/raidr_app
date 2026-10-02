@@ -16,6 +16,7 @@ export function useFooterConfig(): FooterConfig {
     links: [
       { label: t('nav.mcps', 'MCP servers'), href: '/mcps' },
       { label: t('nav.skills', 'Skills'), href: '/skills' },
+      { label: t('nav.domains', 'Domains'), href: '/domains' },
       { label: t('nav.sites', 'Sites'), href: '/sites' },
     ],
     LinkComponent: LinkWrapper,

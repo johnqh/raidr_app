@@ -6,21 +6,27 @@ import { useTranslation } from 'react-i18next';
 import { Button, Card, Heading, Text } from '@sudobility/components';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
 
-export function SignInPrompt() {
+/** Defaults to the MCP wording; the API pages pass their own `title`/`description`. */
+export function SignInPrompt({
+  title,
+  description,
+}: { title?: string; description?: string } = {}) {
   const { t } = useTranslation();
   const { lang = 'en' } = useParams<{ lang: string }>();
   const location = useLocation();
-  const redirect = encodeURIComponent(location.pathname);
+  // Keep the query: /api?domain=… and /endpoint?endpoint=… live in it.
+  const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
   return (
     <Card variant="bordered" padding="lg" className="text-center">
       <Heading level={2} size="xl" className="mb-2">
-        {t('signInPrompt.title', 'Sign in to see the full MCP server')}
+        {title ?? t('signInPrompt.title', 'Sign in to see the full MCP server')}
       </Heading>
       <Text color="muted" className="max-w-xl mx-auto mb-6">
-        {t(
-          'signInPrompt.description',
-          'The tools, request mappings and connection setup are available to signed-in users. Sign in, create an API key for your organization, and connect any MCP client.'
-        )}
+        {description ??
+          t(
+            'signInPrompt.description',
+            'The tools, request mappings and connection setup are available to signed-in users. Sign in, create an API key for your organization, and connect any MCP client.'
+          )}
       </Text>
       <LocalizedLink to={`/login?redirect=${redirect}`}>
         <Button size="lg">{t('signInPrompt.action', 'Sign in')}</Button>

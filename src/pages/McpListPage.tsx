@@ -6,6 +6,7 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState, ErrorState, Loading } from '@/components/PageState';
 import { Pagination, SearchBar } from '@/components/SearchPagination';
 import { useApi } from '@sudobility/building_blocks/firebase';
+import { links } from '@/config/links';
 
 /** `/:lang/mcps`: searchable MCP catalog. */
 export default function McpListPage() {
@@ -38,11 +39,7 @@ export default function McpListPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6 [&>*]:min-w-0">
           {catalog.items.map(mcp => (
-            <LocalizedLink
-              key={mcp.api_host}
-              to={`/mcps/${encodeURIComponent(mcp.api_host)}`}
-              className="block"
-            >
+            <LocalizedLink key={mcp.api_host} to={links.mcp(mcp.api_host)} className="block">
               <Card
                 variant="bordered"
                 padding="md"
