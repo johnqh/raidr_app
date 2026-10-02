@@ -151,7 +151,7 @@
     "cred": {
       "none": "This endpoint needs no credentials.",
       "signIn": "Sign in to {{site}}",
-      "signInHint": "Opens the site in a small window. Sign in there, then paste your token below.",
+      "signInHint": "Opens the site in a small window. Sign in there, close it, then paste your token below.",
       "whereTitle": "Where to find your token",
       "cookie": "Session cookie ({{name}})",
       "header": "Token ({{name}} header)",
@@ -161,7 +161,20 @@
       "query": "query parameter",
       "headerWord": "header",
       "remember": "Remember in this browser",
-      "rememberHint": "Kept on this device only and sent to raidr only when you press Execute."
+      "rememberHint": "Kept on this device only and sent to raidr only when you press Execute.",
+      "waiting": "Waiting for you to sign in to {{site}}. Close that window when you are done.",
+      "closedTitle": "Signed in?",
+      "closedBody": "The {{site}} window is closed. Copy your token from {{site}} as described below and paste it into the field.",
+      "signInHintExt": "The raidr extension opens {{site}}, picks up your token once you are signed in, and closes the window.",
+      "waitingExt": "Waiting for you to sign in to {{site}}. The window closes by itself when you are in.",
+      "capturedTitle": "Signed in to {{site}}",
+      "capturedUnverified": "Your token is filled in, but raidr could not confirm it yet. Press Execute to check; if the API answers 401, sign in again.",
+      "capturedBody": "Your token is filled in. You can press Execute.",
+      "notSignedTitle": "No sign-in seen",
+      "notSignedBody": "The {{site}} window closed before raidr saw you signed in. Try again, or copy the token by hand as described below.",
+      "extTitle": "Skip the copying",
+      "extBody": "With the raidr browser extension, raidr fills in your token itself once you sign in. Installed it already? Reload this page.",
+      "extLink": "Get the raidr extension"
     },
     "kicker": "API domain",
     "mcpLink": "MCP",
@@ -172,7 +185,27 @@
     "endpointsTitle": "Endpoints ({{count}})",
     "version": "Version {{v}}",
     "flowTitle": "How the endpoints connect",
-    "flowSubtitle": "Which calls supply the data (ids, tokens) other calls need. Click a tile to open it."
+    "flowSubtitle": "Which calls supply the data (ids, tokens) other calls need. Hover a tile to trace its flow; click it to open it.",
+    "guide": {
+      "devtools": "In that window, open the developer tools:",
+      "or": "or",
+      "safari": "Safari: first turn on Settings › Advanced › \"Show features for web developers\".",
+      "cookieTab": "Open the Application tab (Firefox and Safari: Storage). It may hide behind the » arrow.",
+      "cookieList": "In the left column, open Cookies and click the {{site}} entry.",
+      "cookieRow": "Find the row named",
+      "cookieCopy": ", double-click its Value and copy it (⌘C / Ctrl+C).",
+      "network": "Click the Network tab, then reload the page (⌘R / Ctrl+R) so its requests appear.",
+      "filter": "Type this into the filter box at the top of the list:",
+      "pick": "Click any request in the list. In the panel that opens, choose Headers and scroll to Request Headers.",
+      "find": "Find the line",
+      "copyAfter": " — copy everything after \"{{prefix}}\" (right-click the value › Copy value, then delete the \"{{prefix}}\" at the start).",
+      "copyAll": " — copy its whole value (right-click › Copy value).",
+      "noHeader": "No such line? Click another request: not every call carries it. Still none means you are not signed in yet.",
+      "title": "How to copy your token by hand",
+      "signIn": "Click \"Sign in to {{site}}\" above and sign in. If you are already signed in there, the site just opens on your account.",
+      "paste": "Paste it into the field below. That is all.",
+      "safety": "This token is your signed-in session on {{site}}: treat it like a password and paste it only here. Tokens expire; if Execute starts answering 401, get a fresh one the same way."
+    }
   },
   "domains": {
     "title": "Websites",
@@ -214,8 +247,13 @@
       "login": "Log in",
       "endpoint": "This API (opens the playground)",
       "external": "Another API domain (opens its page)",
-      "lines": "Dashed: credential. Faint: inferred from the API’s shape."
+      "lines": "Dashed: credential. Lighter: inferred from the API’s shape. Hover a tile to trace its flow.",
+      "group": "Endpoints that take the same value"
     },
-    "hidden": "{{count}} less connected endpoints are not shown."
+    "hidden": "{{count}} less connected endpoints are not shown.",
+    "login": "Log in",
+    "group": "Uses {{param}}",
+    "more": "+{{count}} more",
+    "less": "Show fewer"
   }
 }

@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, Heading, Text } from '@sudobility/components';
@@ -20,10 +21,24 @@ export default function ApiPage() {
   const apiHost = params.get('domain') ?? '';
   const api = useApi();
   const { user, loading: authLoading } = useAuthStatus();
+  // Group tiles on the flow map that list every member.
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const toggleGroup = useCallback(
+    (id: string) =>
+      setExpandedGroups(current =>
+        current.includes(id) ? current.filter(g => g !== id) : [...current, id]
+      ),
+    []
+  );
   const inspector = useApiInspector({
     ...api,
     apiHost,
     isAuthenticated: !!user && !user.isAnonymous,
+    flowOptions: {
+      loginLabel: t('flow.login', 'Log in'),
+      groupLabel: t('flow.group', 'Uses {{param}}', { param: '{{param}}' }),
+      expandedGroups,
+    },
   });
 
   if (inspector.isLoading || authLoading) return <Loading />;
@@ -97,7 +112,7 @@ export default function ApiPage() {
                 'Which calls supply the data (ids, tokens) other calls need. Click a tile to open it.'
               )}
             </Text>
-            <FlowMap graph={inspector.flow} />
+            <FlowMap graph={inspector.flow} onToggleGroup={toggleGroup} />
           </Section>
           <Section spacing="md">
             <Heading level={2} size="2xl" className="mb-4">

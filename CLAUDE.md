@@ -35,9 +35,9 @@ organizations and their API keys.
 Developers sign up, create a `raidr_…` key under an organization, and use it
 against `https://api.raidr.app/mcp/<apiHost>`. A skill asks for that key on
 first run and keeps it in `~/.raidr/config.json`. `package.json` is
-`"private": true` (name `raidr_app`, version 0.1.6): nothing is published to
-npm. Depends on `@sudobility/raidr_lib` ^0.1.6, `@sudobility/raidr_client` ^0.1.4
-and `@sudobility/raidr_types` ^0.1.6 from npm.
+`"private": true` (name `raidr_app`, version 0.1.7): nothing is published to
+npm. Depends on `@sudobility/raidr_lib` ^0.1.7, `@sudobility/raidr_client` ^0.1.5
+and `@sudobility/raidr_types` ^0.1.7 from npm.
 
 **Release.** `scripts/push_all.sh` (this repo) drives the whole raidr family, in
 order (`path:wait`): `raidr_types:60 → raidr_processor:60 → raidr_client:60 →
@@ -92,8 +92,9 @@ src/
 │   ├── ToolsTable.tsx        manifest tools
 │   ├── CopyBlock.tsx, Markdown.tsx
 │   ├── api/                  MethodBadge, AuthBadge, ParamField (enum → Select, text → Input with
-│   │                         validation, Switch, JSON TextArea), CredentialPanel (login popup, token /
-│   │                         key fields, Remember), ResponseView, FlowMap (@xyflow/react)
+│   │                         validation, Switch, JSON TextArea), CredentialPanel (sign-in via the
+│   │                         extension or a popup, token / key fields, Remember), TokenGuide (copying
+│   │                         a token by hand, per auth style), ResponseView, FlowMap (@xyflow/react)
 │   └── layout/               ScreenContainer, Section, ErrorBoundary, LocalizedLink, LinkWrapper,
 │                             ProtectedRoute, EntityRedirect
 ├── pages/                    one lazy default export per route (+ NotFoundPage.test.tsx)
@@ -173,6 +174,7 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
 | `VITE_APP_NAME`, `VITE_APP_DOMAIN`, `VITE_SUPPORT_EMAIL` | `CONSTANTS` only; nothing reads them yet | `raidr`, `raidr.app`, `support@raidr.app` |
 | `VITE_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID`, `_MEASUREMENT_ID` | `initializeWebApp({ firebaseConfig })`: Analytics and Auth | **required**; the app shows a config notice without them |
 | `VITE_FIREBASE_PROXY` | `setFirebaseProxy` in `main.tsx` | unset |
+| `VITE_EXTENSION_URL` | `CONSTANTS.EXTENSION_URL` → the playground's "Get the raidr extension" link | `https://github.com/johnqh/raidr_extension#install` |
 
 For a local raidr_api set `VITE_API_URL=http://localhost:8037`. The API must
 use the same Firebase project (`FIREBASE_PROJECT_ID`) to accept sign-ins.
@@ -265,13 +267,41 @@ next `bun install` restores the npm copy; ship only against published versions.
   The shared `@sudobility/components` `LocalizedLink` checks
   `to.startsWith('/en')` as a plain string, so `/endpoint?…` was taken as
   already prefixed and rendered without a language. Keep the local wrapper.
-- react-flow's stylesheet (`@xyflow/react/dist/style.css`) fixes default
-  nodes at 150px wide, so `FlowMap` sets the tile width (`TILE_WIDTH`, 240)
-  with an inline `style`; a Tailwind width class loses.
+- `FlowMap` draws raidr_lib's laid-out graph as is: positions and sizes come
+  from `buildFlowGraph` (dagre), nodes are custom types `tile` and
+  `endpointGroup` (`FlowGroupNode.tsx`) sized with an inline `style`. Do not
+  name a node type `group`: React Flow reserves it for parent nodes. Do not
+  switch back to default nodes either: their stylesheet fixes them at 150px.
 - `FlowMap` tile colors: this API's endpoints use the card color (click opens
   the playground), endpoints on other API domains are amber (click opens that
-  API page), the log-in step is emerald. Auth links are dashed, inferred
-  links faint.
+  API page), the log-in step is emerald, groups are sky blue with one row per
+  endpoint (rows open the playground; shared path segments are shown as `…`).
+  Auth links are dashed, inferred links lighter, `back` edges faint. Hover
+  (or a first tap on touch screens) lights the tile's `flowPath` and dims the
+  rest; labels show only on lit edges and edges into groups. "+N more"
+  toggles a group through `ApiPage`'s `expandedGroups`, which re-runs the
+  layout. The minimap appears above 1100px of drawing and is hidden on
+  phones.
+- The playground's "Sign in to {site}" depends on raidr_lib's
+  `useEndpointPlayground` (`extension`, `loginWindow`, `tokenVerified`).
+  **With the raidr extension** (`extension === 'available'`), the extension
+  opens the site, reads the token off the site's own requests once a
+  signed-in-only call succeeds, closes the window and the token is filled in:
+  `CredentialPanel` shows "Signed in to {site}" (`captured`; an unverified
+  token says to press Execute and sign in again on a 401), or "No sign-in
+  seen" plus `TokenGuide` when the window closed first. **Without it**
+  (`missing`), the popup is another origin raidr cannot read: raidr sees only
+  the window close (`open` → `closed`), shows "Signed in?" and focuses the
+  token field. The panel then offers "Get the raidr extension"
+  (`CONSTANTS.EXTENSION_URL`) and always shows `TokenGuide`: steps per auth
+  style (cookie: Application/Storage → Cookies; bearer/header: Network,
+  filter on the API host, Request Headers, copy after the prefix) with
+  keyboard shortcuts for Mac and Windows/Linux and a Safari note. A pasted
+  token resets `loginWindow` to idle.
+- The raidr.app origins the extension answers are listed in raidr_extension's
+  `BRIDGE_MATCHES` (`src/bridge/origins.ts`: `raidr.app`, `*.raidr.app`,
+  `localhost`, `127.0.0.1`). A new deploy domain must be added there (and to
+  its manifest), or the playground always reports the extension `missing`.
 - `SignInPrompt`'s `redirect` keeps `location.search`: the API page and
   playground live in the query string.
 - The top bar lists Domains, MCP servers, Skills; Sites moved to the footer

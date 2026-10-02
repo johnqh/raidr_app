@@ -102,6 +102,9 @@ export default function EndpointPage() {
               remember={pg.remember}
               onRemember={pg.setRemember}
               onOpenLogin={pg.openLogin}
+              loginWindow={pg.loginWindow}
+              extension={pg.extension}
+              tokenVerified={pg.tokenVerified}
             />
           </Card>
         </Section>

@@ -31,6 +31,13 @@ Credentials entered in the playground (a site token or an application key)
 are remembered in this browser per API domain and sent only with the request
 you execute; raidr never stores them.
 
+With the [raidr browser extension](https://github.com/johnqh/raidr_extension#install)
+installed, "Sign in to {site}" in the playground is automatic: the extension
+opens the site, picks up your token once you are signed in, closes the window
+and fills the token in. Without it, the playground opens the site in a popup
+and shows a step-by-step guide to copying the token by hand.
+`VITE_EXTENSION_URL` sets where the "Get the raidr extension" link points.
+
 ## Run
 
 ```bash
