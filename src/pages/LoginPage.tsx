@@ -14,6 +14,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { LoginPage as LoginPageComponent } from '@sudobility/building_blocks';
 import { EmptyState, Loading } from '@/components/PageState';
@@ -59,6 +60,9 @@ export default function LoginPage() {
       }}
       onEmailSignUp={async (email, password) => {
         await createUserWithEmailAndPassword(auth, email, password);
+      }}
+      onPasswordReset={async email => {
+        await sendPasswordResetEmail(auth, email);
       }}
       onGoogleSignIn={async () => {
         await signInWithPopup(auth, new GoogleAuthProvider());

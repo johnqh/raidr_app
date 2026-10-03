@@ -29,16 +29,20 @@ BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 #   before the crawler; raidr_extension needs processor; raidr_api needs
 #   types; raidr_web depends on nothing.
 PROJECTS=(
-    "../raidr_types:60"
+    "../raidr_types:0"
+    "../raidr_agent_types:60"
     "../raidr_processor:60"
-    "../raidr_client:60"
-    "../raidr_lib:60"
+    "../raidr_client:0"
+    "../raidr_agent_client:60"
+    "../raidr_lib:0"
+    "../raidr_agent_lib:60"
     "../raidr_cli:180"
     "../raidr_crawler:0"
     "../raidr_extension:0"
     "../raidr_api:0"
     "../raidr_app:0"
     "../raidr_web:0"
+    "../raidr_agent_app:0"
 )
 
 # Source reusable script: prefer local workflows repo, fall back to GitHub
