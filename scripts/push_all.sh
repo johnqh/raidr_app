@@ -28,6 +28,9 @@ BASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 #   (it imports raidr_cli's reconstruct), so cli is published, and waited for,
 #   before the crawler; raidr_extension needs processor; raidr_api needs
 #   types; raidr_web depends on nothing.
+#   raidr agent: raidr_agent_types -> raidr_agent_client -> raidr_agent_lib;
+#   raidr_agent_api needs raidr_types + raidr_agent_types; raidr_agent_app_rn
+#   depends on nothing yet.
 PROJECTS=(
     "../raidr_types:0"
     "../raidr_agent_types:60"
@@ -42,7 +45,8 @@ PROJECTS=(
     "../raidr_api:0"
     "../raidr_app:0"
     "../raidr_web:0"
-    "../raidr_agent_app:0"
+    "../raidr_agent_api:0"
+    "../raidr_agent_app_rn:0"
 )
 
 # Source reusable script: prefer local workflows repo, fall back to GitHub

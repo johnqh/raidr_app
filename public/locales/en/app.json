@@ -116,7 +116,9 @@
     "invitations": "Invitations",
     "organization": "Organization",
     "loadFailed": "Could not load your organizations",
-    "apiKeysIntro": "Use an API key to connect MCP clients to raidr, or paste it when a raidr skill asks for it. Keys belong to the organization, not to you, and are shown only once."
+    "apiKeysIntro": "Use an API key to connect MCP clients to raidr, or paste it when a raidr skill asks for it. Keys belong to the organization, not to you, and are shown only once.",
+    "signInTitle": "Sign in to open your dashboard",
+    "signInDescription": "Your organizations, members, invitations and API keys are here once you are signed in. It is free to sign up."
   },
   "signInPrompt": {
     "title": "Sign in to see the full MCP server",

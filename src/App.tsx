@@ -7,7 +7,7 @@
  * a network client that adds the signed-in user's token), and
  * CurrentEntityProvider for the selected organization. There is no
  * subscription provider yet (pricing comes later). Every page lives under
- * `/:lang`; the dashboard requires sign-in.
+ * `/:lang`; the dashboard requires sign-in (asked in place, not by redirect).
  */
 import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Outlet, Route, Routes, useParams, useSearchParams } from 'react-router-dom';
@@ -16,6 +16,7 @@ import { LanguageRedirect, LanguageValidator } from '@sudobility/components';
 import i18n, { isLanguageSupported } from './i18n';
 import { AuthProviderWrapper } from './components/providers/AuthProviderWrapper';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import { SignInProvider } from './components/auth/SignInProvider';
 import { CONSTANTS } from './config/constants';
 import ScreenContainer from './components/layout/ScreenContainer';
 import { ErrorBoundary } from './components/layout/ErrorBoundary';
@@ -82,17 +83,20 @@ function NotFoundRedirect() {
 
 /**
  * Top bar + footer around every page. The inner ErrorBoundary and Suspense
- * keep the shell visible while a page chunk loads or fails.
+ * keep the shell visible while a page chunk loads or fails. `SignInProvider`
+ * mounts the one in-flow sign-in modal (see its file for the rule).
  */
 function ScreenContainerLayout() {
   return (
-    <ScreenContainer>
-      <ErrorBoundary>
-        <Suspense fallback={<Loading />}>
-          <Outlet />
-        </Suspense>
-      </ErrorBoundary>
-    </ScreenContainer>
+    <SignInProvider>
+      <ScreenContainer>
+        <ErrorBoundary>
+          <Suspense fallback={<Loading />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
+      </ScreenContainer>
+    </SignInProvider>
   );
 }
 

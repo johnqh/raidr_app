@@ -30,7 +30,7 @@ organizations and their API keys.
 | Domains (websites → API domains) | yes | yes |
 | API page (`/api?domain=`) | summary + `SignInPrompt` | endpoint list by tag + flow map |
 | Endpoint playground (`/endpoint?endpoint=`) | `SignInPrompt` | params form, credentials, Execute, response |
-| `/dashboard/:entitySlug/*` | redirect to `/:lang/login` | API keys, workspaces, members, invitations |
+| `/dashboard/:entitySlug/*` | `SignInPrompt` at the same URL, sign-in modal opened over it | API keys, workspaces, members, invitations |
 
 Developers sign up, create a `raidr_…` key under an organization, and use it
 against `https://api.raidr.app/mcp/<apiHost>`. A skill asks for that key on
@@ -59,11 +59,11 @@ where noted.
 | `bun run verify` | typecheck → lint → test:unit → build | exit 0 |
 | `bun run typecheck` | `tsc -b` (app + node configs; includes tests) | exit 0 |
 | `bun run lint` | `eslint .` (ignores `dist`, `scripts`) | exit 0 |
-| `bun run test:unit` | Vitest once, happy-dom, `src/test/setup.ts` | 2 files, 2 tests pass |
+| `bun run test:unit` | Vitest once, happy-dom, `src/test/setup.ts` | 3 files, 5 tests pass |
 | `bun run build` | `tsc -b && vite build` → `dist/` | exit 0 |
 | `bun run dev` | Vite on http://localhost:5144 | served `/` and `/locales/en/app.json` (200) |
 | `bun run preview` | serve `dist/` on :4173 | served `/` (200) |
-| `bun run format:check` | Prettier on `src/**/*.{ts,tsx,css}` | **exit 1: 14 files already unformatted** (not part of verify) |
+| `bun run format:check` | Prettier on `src/**/*.{ts,tsx,css}` | exit 0 (2026-10-03; not part of verify) |
 | `bun run format` | rewrite those files | not run (would reformat untouched code) |
 | `bun run deploy` | publish `dist/` to Cloudflare Pages | not run (deploys to production) |
 
@@ -82,12 +82,14 @@ src/
 │   ├── auth-config.ts        auth-components texts from the `auth` namespace
 │   ├── links.ts              `links.*` builds every internal catalog URL; skillSlugFor(apiHost)
 │   └── entityClient.ts       useEntityClient() for entity_pages
-├── hooks/                    useTopBarConfig, useFooterConfig, useLocalizedNavigate, useDocumentLanguage
+├── hooks/                    useTopBarConfig, useFooterConfig, useLocalizedNavigate, useDocumentLanguage,
+│                             useSignIn (handlers + words for both the login page and the modal)
 ├── components/
 │   ├── PageState.tsx         Loading, EmptyState, ErrorState
 │   ├── SearchPagination.tsx  SearchBar (300 ms debounce), Pagination
 │   ├── ConnectDocs.tsx       endpoint, API key + site token inputs, Claude Code / Desktop / Cursor tabs
-│   ├── SignInPrompt.tsx      shown on MCP detail when signed out
+│   ├── SignInPrompt.tsx      signed-out stand-in (MCP, API, endpoint, dashboard); button opens the modal
+│   ├── auth/                 SignInProvider (the one LoginModal) + signInContext (useSignInModal)
 │   ├── providers/AuthProviderWrapper.tsx  Firebase AuthProvider; config notice if Firebase is missing
 │   ├── ToolsTable.tsx        manifest tools
 │   ├── CopyBlock.tsx, Markdown.tsx
@@ -96,9 +98,9 @@ src/
 │   │                         extension or a popup, token / key fields, Remember), TokenGuide (copying
 │   │                         a token by hand, per auth style), ResponseView, FlowMap (@xyflow/react)
 │   └── layout/               ScreenContainer, Section, ErrorBoundary, LocalizedLink, LinkWrapper,
-│                             ProtectedRoute, EntityRedirect
+│                             ProtectedRoute (prompt + modal in place, no redirect), EntityRedirect
 ├── pages/                    one lazy default export per route (+ NotFoundPage.test.tsx)
-│   ├── LoginPage.tsx         building_blocks LoginPage; `?redirect=` must be a same-site path
+│   ├── LoginPage.tsx         building_blocks LoginPage (top bar's Log in); goes to the dashboard after
 │   └── dashboard/            DashboardLayout + ApiKeys/Workspaces/Members/Invitations (entity_pages)
 └── test/setup.ts
 public/locales/en/app.json    all UI text
@@ -142,6 +144,20 @@ wrangler.toml                 Pages project `raidr-app`, output `./dist`
   same app. Without `VITE_FIREBASE_*` the app renders a configuration notice
   instead of pages, because building_blocks' ApiProvider and `useAuthStatus`
   need an AuthProvider. Subscriptions and RevenueCat are not used yet.
+- **Sign-in: a page when you go there, a modal when you are in the middle of
+  something.** Navigating *in order to* sign in (the top bar's Log in →
+  `/:lang/login`) is building_blocks' `LoginPage`. Sign-in needed in the
+  middle of something else — a signed-out MCP, API or endpoint page, the
+  dashboard, any action that needs an account — opens components'
+  `LoginModal` over the current page (`useSignInModal().openSignIn(onSuccess?)`,
+  one modal mounted by `SignInProvider`); signing in re-renders the page with
+  its signed-in content and `onSuccess` lets an action continue. Closing it
+  without signing in leaves the page's signed-out view (`SignInPrompt`, whose
+  button reopens it). Never `navigate('/login')`, `<Navigate to=login>` or a
+  `?redirect=` round trip from those places: `ProtectedRoute` renders the
+  prompt at the same URL and opens the modal on arrival. Both surfaces take
+  their handlers and words from `useSignIn` (email/password with sign-up and
+  password reset, Google), with the words in `public/locales/<lng>/auth.json`.
 - Signed-out views must only use summary data (`useMcp().summary`). The full
   manifest is fetched only when `isAuthenticated`; the API enforces the same
   rule with a 401.
@@ -198,7 +214,7 @@ For a signed-out smoke test without a real project, placeholder values
 | `/:lang/sites` | `SiteListPage` | `useSiteCatalog` |
 | `/:lang/sites/:origin` | `SiteDetailPage` | `useSite` (origin decoded by the router) |
 | `/:lang/login` | `LoginPage` | Firebase Auth |
-| `/:lang/dashboard` | `ProtectedRoute` → `EntityRedirect` | first entity → `dashboard/:slug/api-keys` |
+| `/:lang/dashboard` | `ProtectedRoute` → `EntityRedirect` | first entity → `dashboard/:slug/api-keys`; signed out: prompt + modal in place |
 | `/:lang/dashboard/:entitySlug/{api-keys,workspaces,members,invitations}` | `DashboardLayout` + page | entity_pages via `useEntityClient` |
 | `/:lang/404` | `NotFoundPage` | — |
 | `/:lang/*` | `NotFoundRedirect` → `/:lang/404` | — |
@@ -249,8 +265,8 @@ next `bun install` restores the npm copy; ship only against published versions.
 - `vite.config.ts` dedupes React, TanStack Query, the `@sudobility` UI packages,
   Firebase and both raidr packages: two copies of raidr_lib would mean two
   catalog filter stores.
-- `format:check` fails on 14 existing files; `verify` does not run it. Do not
-  reformat untouched files as a side effect.
+- `verify` does not run `format:check`; run it yourself. It passed on
+  2026-10-03.
 - `src/` imports none of `subscription-components`, `subscription_lib`,
   `devops-components`; they match optional peers of building_blocks. Check
   the build before removing any.
@@ -302,7 +318,8 @@ next `bun install` restores the npm copy; ship only against published versions.
   `BRIDGE_MATCHES` (`src/bridge/origins.ts`: `raidr.app`, `*.raidr.app`,
   `localhost`, `127.0.0.1`). A new deploy domain must be added there (and to
   its manifest), or the playground always reports the extension `missing`.
-- `SignInPrompt`'s `redirect` keeps `location.search`: the API page and
-  playground live in the query string.
+- `SignInPrompt` must render under `SignInProvider` (mounted in `App.tsx`'s
+  `ScreenContainerLayout`); `useSignInModal` throws outside it. A test that
+  renders it wraps it in the provider.
 - The top bar lists Domains, MCP servers, Skills; Sites moved to the footer
   only.

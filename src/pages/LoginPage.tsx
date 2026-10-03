@@ -1,38 +1,29 @@
 /**
- * @fileoverview Sign in / sign up with email or Google (Firebase Auth).
+ * @fileoverview `/:lang/login`: the page a visitor navigates to in order to
+ * sign in (the top bar's Log in). building_blocks' `LoginPage`, with the same
+ * handlers and words as the in-flow modal (`useSignIn`). Once signed in it
+ * goes to the dashboard.
  *
- * Uses building_blocks' LoginPage. After sign-in the user returns to where
- * they came from (?redirect=) or goes to the dashboard.
+ * Sign-in needed in the middle of something else does not come here: those
+ * places open `LoginModal` over the page (`SignInProvider`), so there is no
+ * `?redirect=` round trip.
  */
 import { useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStatus } from '@sudobility/auth-components';
-import { getFirebaseAuth } from '@sudobility/auth_lib';
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  sendPasswordResetEmail,
-} from 'firebase/auth';
 import { LoginPage as LoginPageComponent } from '@sudobility/building_blocks';
 import { EmptyState, Loading } from '@/components/PageState';
 import { CONSTANTS } from '@/config/constants';
-
-/** Only same-app paths are accepted as a post-login destination. */
-function safeRedirect(value: string | null, lang: string): string {
-  return value && value.startsWith(`/${lang}/`) ? value : `/${lang}/dashboard`;
-}
+import { useSignIn } from '@/hooks/useSignIn';
 
 export default function LoginPage() {
   const { t } = useTranslation();
   const { user, loading } = useAuthStatus();
   const navigate = useNavigate();
   const { lang = 'en' } = useParams<{ lang: string }>();
-  const [params] = useSearchParams();
-  const destination = safeRedirect(params.get('redirect'), lang);
-  const auth = getFirebaseAuth();
+  const destination = `/${lang}/dashboard`;
+  const { auth, handlers, viewText, pageHeadings } = useSignIn();
 
   useEffect(() => {
     if (!loading && user) navigate(destination, { replace: true });
@@ -55,18 +46,8 @@ export default function LoginPage() {
     <LoginPageComponent
       appName={CONSTANTS.APP_NAME}
       logo={<img src="/logo.png" alt={CONSTANTS.APP_NAME} className="h-12" />}
-      onEmailSignIn={async (email, password) => {
-        await signInWithEmailAndPassword(auth, email, password);
-      }}
-      onEmailSignUp={async (email, password) => {
-        await createUserWithEmailAndPassword(auth, email, password);
-      }}
-      onPasswordReset={async email => {
-        await sendPasswordResetEmail(auth, email);
-      }}
-      onGoogleSignIn={async () => {
-        await signInWithPopup(auth, new GoogleAuthProvider());
-      }}
+      {...handlers}
+      text={{ ...viewText, ...pageHeadings }}
       onSuccess={() => navigate(destination, { replace: true })}
     />
   );

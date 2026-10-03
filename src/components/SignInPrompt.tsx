@@ -1,21 +1,20 @@
 /**
- * @fileoverview Shown on an MCP page to signed-out visitors instead of the tools and connection setup.
+ * @fileoverview Shown on a page to signed-out visitors in place of what needs
+ * an account (MCP tools and connection setup, API endpoints, the playground,
+ * the dashboard). Its button opens the sign-in modal over the page; signing in
+ * re-renders the page with its signed-in content. It never goes to `/login`.
  */
-import { useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Heading, Text } from '@sudobility/components';
-import { LocalizedLink } from '@/components/layout/LocalizedLink';
+import { useSignInModal } from '@/components/auth/signInContext';
 
-/** Defaults to the MCP wording; the API pages pass their own `title`/`description`. */
+/** Defaults to the MCP wording; other pages pass their own `title`/`description`. */
 export function SignInPrompt({
   title,
   description,
 }: { title?: string; description?: string } = {}) {
   const { t } = useTranslation();
-  const { lang = 'en' } = useParams<{ lang: string }>();
-  const location = useLocation();
-  // Keep the query: /api?domain=… and /endpoint?endpoint=… live in it.
-  const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+  const { openSignIn } = useSignInModal();
   return (
     <Card variant="bordered" padding="lg" className="text-center">
       <Heading level={2} size="xl" className="mb-2">
@@ -28,11 +27,11 @@ export function SignInPrompt({
             'The tools, request mappings and connection setup are available to signed-in users. Sign in, create an API key for your organization, and connect any MCP client.'
           )}
       </Text>
-      <LocalizedLink to={`/login?redirect=${redirect}`}>
-        <Button size="lg">{t('signInPrompt.action', 'Sign in')}</Button>
-      </LocalizedLink>
+      <Button size="lg" onClick={() => openSignIn()}>
+        {t('signInPrompt.action', 'Sign in')}
+      </Button>
       <Text size="xs" color="muted" className="mt-4">
-        {t('signInPrompt.lang', 'Free to sign up.')} <span className="sr-only">{lang}</span>
+        {t('signInPrompt.lang', 'Free to sign up.')}
       </Text>
     </Card>
   );

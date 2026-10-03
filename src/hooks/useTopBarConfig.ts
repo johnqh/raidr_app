@@ -58,6 +58,8 @@ export function useTopBarConfig(): TopBarConfig {
   return {
     variant: 'firebase',
     AuthActionComponent: AuthAction as ComponentType<AuthActionProps>,
+    // Navigating in order to sign in: the /login page (LoginPage). Sign-in in
+    // the middle of something else is the modal (SignInProvider) instead.
     onLoginClick: () => navigate('/login'),
     authenticatedMenuItems,
     logo: { src: '/logo.png', appName: t('app.name', 'raidr'), onClick: () => navigate('/') },
