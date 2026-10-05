@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Card, Heading, Text, TextArea } from '@sudobility/components';
 import { useEndpointPlayground } from '@sudobility/raidr_lib';
-import type { ApiParamLocation } from '@sudobility/raidr_types';
+import { isApiEndpointV2, type ApiParamLocation } from '@sudobility/raidr_types';
 import { useApi } from '@sudobility/building_blocks/firebase';
 import { useAuthStatus } from '@sudobility/auth-components';
 import { LocalizedLink } from '@/components/layout/LocalizedLink';
@@ -15,6 +15,7 @@ import { AuthBadge } from '@/components/api/AuthBadge';
 import { ParamField } from '@/components/api/ParamField';
 import { CredentialPanel } from '@/components/api/CredentialPanel';
 import { ResponseView } from '@/components/api/ResponseView';
+import { SchemaTree } from '@/components/api/SchemaTree';
 import { links } from '@/config/links';
 
 const LOCATIONS: ApiParamLocation[] = ['path', 'query', 'header', 'body'];
@@ -47,11 +48,13 @@ export default function EndpointPage() {
       </Section>
     );
   }
-  if (pg.notFound || !pg.endpoint || !pg.doc) {
+  if (pg.notFound || !pg.endpoint || !pg.doc || !pg.form) {
     return <EmptyState title={t('endpoint.notFound', 'Endpoint not found')} description={ref} />;
   }
 
-  const { endpoint, doc } = pg;
+  const { endpoint, doc, form } = pg;
+  // Version 2 documents the body's full shape; shown above its fields.
+  const bodySchema = isApiEndpointV2(endpoint) ? endpoint.input.properties.body : undefined;
   const labelOf: Record<ApiParamLocation, string> = {
     path: t('endpoint.loc.path', 'Path parameters'),
     query: t('endpoint.loc.query', 'Query parameters'),
@@ -114,19 +117,30 @@ export default function EndpointPage() {
         <Heading level={2} size="xl" className="mb-3">
           {t('endpoint.paramsTitle', 'Parameters')}
         </Heading>
-        {endpoint.params.length === 0 && !endpoint.additionalBody ? (
+        {form.params.length === 0 && form.rawBody === 'none' ? (
           <Text color="muted">{t('endpoint.noParams', 'This endpoint takes no parameters.')}</Text>
         ) : (
           <div className="space-y-4">
             {LOCATIONS.map(location => {
-              const list = endpoint.params.filter(p => p.in === location);
-              const extra = location === 'body' && endpoint.additionalBody;
+              const list = form.params.filter(p => p.in === location);
+              const extra = location === 'body' && form.rawBody !== 'none';
+              const whole = form.rawBody === 'whole';
               if (list.length === 0 && !extra) return null;
               return (
                 <Card key={location} variant="bordered" padding="md">
                   <Text weight="semibold" className="mb-1">
                     {labelOf[location]}
                   </Text>
+                  {location === 'body' && bodySchema && (whole || list.length > 0) ? (
+                    <details className="mb-2">
+                      <summary className="cursor-pointer text-sm text-primary">
+                        {t('endpoint.bodySchema', 'Body structure')}
+                      </summary>
+                      <div className="mt-2">
+                        <SchemaTree schema={bodySchema} />
+                      </div>
+                    </details>
+                  ) : null}
                   {list.map(param => (
                     <ParamField
                       key={param.name}
@@ -139,21 +153,28 @@ export default function EndpointPage() {
                   {extra ? (
                     <div className="pt-3">
                       <Text size="sm" weight="medium">
-                        {list.length > 0
-                          ? t('endpoint.extraBody', 'More body fields (JSON)')
-                          : t('endpoint.rawBody', 'Body fields (JSON)')}
+                        {whole
+                          ? t('endpoint.wholeBody', 'Body (JSON)')
+                          : list.length > 0
+                            ? t('endpoint.extraBody', 'More body fields (JSON)')
+                            : t('endpoint.rawBody', 'Body fields (JSON)')}
                       </Text>
                       <Text size="xs" color="muted" className="mb-2">
-                        {t(
-                          'endpoint.extraBodyHint',
-                          'The fields this endpoint accepts are not all documented. Add any as a JSON object.'
-                        )}
+                        {whole
+                          ? t(
+                              'endpoint.wholeBodyHint',
+                              'The whole request body as JSON, shaped as described above.'
+                            )
+                          : t(
+                              'endpoint.extraBodyHint',
+                              'The fields this endpoint accepts are not all documented. Add any as a JSON object.'
+                            )}
                       </Text>
                       <TextArea
                         value={pg.extraBody}
                         onChange={pg.setExtraBody}
-                        rows={5}
-                        placeholder='{ "field": "value" }'
+                        rows={whole ? 8 : 5}
+                        placeholder={whole ? '[ … ]' : '{ "field": "value" }'}
                         className="font-mono text-sm"
                       />
                       {shownError('extraBody') ? (
@@ -186,7 +207,16 @@ export default function EndpointPage() {
                     </span>
                   ) : null}
                 </Text>
-                {response.fields?.length ? (
+                {response.description ? (
+                  <Text size="sm" color="muted" className="mt-1">
+                    {response.description}
+                  </Text>
+                ) : null}
+                {'schema' in response && response.schema ? (
+                  <div className="mt-2">
+                    <SchemaTree schema={response.schema} />
+                  </div>
+                ) : 'fields' in response && response.fields?.length ? (
                   <Text size="sm" color="muted" className="mt-1">
                     {t('endpoint.fields', 'Fields: {{fields}}', {
                       fields: response.fields.join(', '),

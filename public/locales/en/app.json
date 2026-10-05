@@ -241,7 +241,10 @@
     "noToken": "No token entered: the API will likely answer 401.",
     "noKey": "No API key entered: the API will likely refuse the request.",
     "fixErrors": "Fix the highlighted fields first.",
-    "failed": "The request could not be run"
+    "failed": "The request could not be run",
+    "wholeBody": "Body (JSON)",
+    "wholeBodyHint": "The whole request body as JSON, shaped as described above.",
+    "bodySchema": "Body structure"
   },
   "flow": {
     "empty": "No flow between endpoints is known for this API yet.",
